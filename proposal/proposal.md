@@ -29,8 +29,8 @@ Project name brainstorming:
 ## Introduction
 Our tool visualizes data collected from AutoTest^, an automatic grading service
 used to grade code submissions for students in CPSC310. The course is structured
-around a term-long coding project that is divided into
-5 deliverables/sprints completed by teams consisting of 2-3
+around a term-long coding project that is divided into 5 deliverables/sprints
+(only the first 3 are graded using AutoTest and TA retrospective) completed by teams consisting of 2-3
 students. The teams manage their shared code on GitHub^ using a basic git
 workflow: students pull the latest code changes from GitHub, commit their modified
 code locally and then push those commits to GitHub for other members to see. Every time a student
@@ -42,16 +42,16 @@ attributes are briefly described in Table 1. We have collected data for over
 deliverable will be available on March 13. There are 285 students in 139 teams.
 
 Table 1:
-| Attribute Name | Description |
-| -------------- | ----------- |
-| testGrade      | Percentage of private tests that passed against student code. |
-| coverageGrade  | Percentage of code executed by student written tests. |
-| finalGrade     | Computed as 0.8*testGrade + 0.2*coverageGrade. |
-| timestamp      | Unix time of record creation. |
-| commitSha      | The (partial) SHA-1 hash of the submitted commit. |
-| committer      | The GitHub ID of the student making the submission. |
-| team           | The team number, stored as `teamXXX`, where `XXX` is a number between 2 and 199. |
-| deliverable    | The submission deliverable, which can have values `d1`, `d2`, or `d3`. |
+| Attribute Name | Attribute Type | Description |
+| -------------- | -------------- | ----------- |
+| testGrade      | Quantitative   | Percentage of private tests that passed against student code. |
+| coverageGrade  | Quantitative   | Percentage of code executed by student written tests. |
+| finalGrade     | Quantitative   | Computed as 0.8*testGrade + 0.2*coverageGrade. |
+| timestamp      | Ordered - Sequential | Unix time of record creation. |
+| commitSha      | Categorical    | The (partial) SHA-1 hash of the submitted commit. |
+| committer      | Categorical (current 285 values; max <1000) | The GitHub ID of the student making the submission. |
+| team           | Categorical (current 139 values; max <1000) | The team number, stored as `teamXXX`, where `XXX` is a number between 2 and 199. |
+| deliverable    | Ordered - Sequential | The submission deliverable, which can have values `d1`, `d2`, or `d3`. |
 
 After a submission deadline, TAs meet with their assigned
 teams to conduct a retrospective to discuss any challenges that arose
@@ -84,9 +84,32 @@ making a judgment when assigning a grade and cannot replace them since students 
 have chosen a different way to divide the work among team members. One common
 example is that one student will write unit tests for the other to pass.
 
-We can
+
 In the what-why-how framework
 
+**What**. Table of graded submission records (items) with the attributes described in Table 1. The dataset is static once it has
+been loaded on the page but is dynamic in that the dataset grows with each new
+submission.
+
+**Why**.
+- Compare (contributions of the team members) and derive (retrospective grade for each of them)
+
+**How**
+- separate individual contributions from final team result and align them on two (or three)
+  parallel axes by timestamp.
+- submissions are represented by point marks that encode the number of submissions
+  that are collapsed into a single mark (overlapping marks may be grouped into a point mark whose size encodes the number of collapsed marks)
+- marks are coloured with luminance encoding the overall grade for the submission.
+  Notice that this is relatively unimportant compared to the ability to accurately
+  compare the number and effect of submissions. This information is also available
+  by hovering over the point mark. For these reasons, we are okay using an encoding
+  that is of low effectiveness and may not be visible on all marks.
+- key data is always visible while interaction allows details about a submission to
+  be seen.
+   - hovering over a single point mark displays a popup with detail information about the submission
+   - clicking a single points opens a new tab that displays the corresponding commit on GitHub
+   - hovering over a grouped mark expands it to show all submissions it includes. Once expanded,
+     the above interactions are allowed.
 
 
 
@@ -95,24 +118,52 @@ In the what-why-how framework
 - magnified bubbles
 
 ## Scenario
-We describe the scenario from the perspective of a TA doing a retrospective with
-a
+Imagine you are a TA tasked with scaling the final grade of each team member by
+the amount they contributed. Upon meeting the team, you open their Teamline to
+get a sense of the team dynamics: did they start early? did they work consistently?
+what was their final grade? This information is immediately available to you
+because Teamline defaults to showing the team-view of the most recently due deliverable.
+Within the view, the you find that the team made a few early submissions that
+increased their grade and then made a large number of submissions very close to
+the deadline. From the navigation pane, you notice that one of the team members
+contributed significantly to final grade unlike the other.
 
-D3 is selected by default being the most recent, passed deadline. D4 is already
-displaying some information because this team has begun work on it. D1 and D2 are
-completed and the summary metrics are given.
+You then proceed to discuss with each team member individually about their contributions
+to the project. The one who made the larger contribution according to Teamline, Bob,
+had a clear understanding of the code and was able to discuss a couple of challenges
+he encountered. At the end of the retrospective, Bob said that each of them had
+done the work they agreed to do (which they thought was an even split) but that
+his partner started very late which made him apprehensive.
+To confirm this, you expand the team-view to show individual submissions made by
+each team member and do in fact notice that all of the submissions for the other
+member, Joe, were made the night before the due date and that Bobs submissions were
+made earlier and more consistently.
 
+Next, you talk to Joe. After he explains what he contributed, you mention that by
+starting so late, it may negatively impact the group dynamic. Joe refutes this by claiming
+that he started days earlier but, after you show him Teamline, agrees that he should
+start earlier next time. While looking at Teamline, you also notice that Bob did
+quite a bit more work for the previous deliverable as well. You point this out to
+both Bob and Joe and they are a bit surprised. You help them divide up the work
+for the next deliverable more equitably.
 
-
+Later in the week, you decide to check how the team is proceeding. You immediately
+see that several submissions were made. Curious to see if your discussion helped,
+you expand the team-view and see that Joe has already made several submissions.
+You feel much more confident having scaled back Joe's grade by only 20% since he
+is now contributing more.
 
 ## Implementation approach
-AutoTest's existing infrastructure uses web standards. In particular, it uses a
-NoSql database that serves JSON content via a REST API. This suggests that the
-most natural implementation would be web-based using HTML/CSS, JavaScript and REST
-calls. The visualization library will be D3.js and possibly one or more libraries
-built on top of D3.
-- Usable by TAs: it can be integrated with the existing web dashboard and used
-  during the retrospective or while entering the grades into the grade manager.
+We have decided to implement Teamline as a web application. We decided on this for
+a variety of reasons: our familiarity with web technologies, platform independence,
+increase likelihood of adoption in CPSC310 (and other courses that will be using AutoTest),
+and integration with other service used in the course. Teamline is minimally dependent
+on existing AutoTest infrastructure, only requiring access to the database via a
+REST endpoint, and is completely novel of the existing system including the dashboard.
+
+Given the above, we will use HTML5, CSS3 and jQuery to implement our vis. With the
+advances in CSS, we believe we will not need a vis-specific library like D3.js but
+we will finalize this decision once we have started coding.
 
 ## Expertise
 We decided on this project, in part, because we are both currently TAs for CPSC310
@@ -183,3 +234,23 @@ made. This can be a decent proxy but can be misleading since different people ha
 different commit habits (some will commit every line, others only large changes)
 and they may not reflect the actual contribution to the grade (i.e. commits that
 don't directly increase the grade).
+
+
+
+---
+- Loose dependency on existing AutoTest infrastructure: REST endpoint for CouchDB.
+- While there are existing visualizations (a dashboard and status page) using data
+  collected by AutoTest, our vis is independent and novel of these.
+- Web-based b/c most likely to be used by TAs. Can be integrated into GitHub Pages.
+- HTML5/CSS3 and jQuery (with the advances in CSS we do not think we will need to use a vis library like D3.js)
+
+We are building
+Our project has only one dependency on existing AutoTest infrastructure
+Our implementation is dependent on
+AutoTest's existing infrastructure uses web standards. In particular, it uses a
+NoSql database that serves JSON content via a REST API. This suggests that the
+most natural implementation would be web-based using HTML/CSS, JavaScript and REST
+calls. The visualization library will be D3.js and possibly one or more libraries
+built on top of D3.
+- Usable by TAs: it can be integrated with the existing web dashboard and used
+  during the retrospective or while entering the grades into the grade manager.
