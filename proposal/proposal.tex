@@ -287,7 +287,7 @@ Imagine you are a TA tasked with scaling the final grade of each team member by
 the amount they contributed. Upon meeting the team, you open their Teamline to
 get a sense of the team dynamics: did they start early? did they work consistently?
 what was their final grade? This information is immediately available to you
-because Teamline defaults to showing the team-view of the most recently due deliverable.
+because Teamline defaults to showing the team-view of the most recently due deliverable (Fig. \ref{fig:teaser}).
 Within the view, the you find that the team made a few early submissions that
 increased their grade and then made a large number of submissions very close to
 the deadline. From the navigation pane, you notice that one of the team members
@@ -299,7 +299,7 @@ had a clear understanding of the code and was able to discuss a couple of challe
 he encountered. At the end of the retrospective, Bob said that each of them had
 done the work they agreed to do (which they thought was an even split) but that
 his partner started very late which made him apprehensive.
-To confirm this, you expand the team-view to show individual submissions made by
+To confirm this, you expand the team-view (Fig. \ref{fig:studentview}) to show individual submissions made by
 each team member and do in fact notice that all of the submissions for the other
 member, Joe, were made the night before the due date and that Bobs submissions were
 made earlier and more consistently.
@@ -317,6 +317,14 @@ see that several submissions were made. Curious to see if your discussion helped
 you expand the team-view and see that Joe has already made several submissions.
 You feel much more confident having scaled back Joe's grade by only 20% since he
 is now contributing more.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{student-view-mockup}
+  \caption{Student view of the Teamline visulaization. Submissions are displayed
+   separately for each student.}
+  \label{fig:studentview}
+\end{figure}
 
 
 \section{Implementation Approach}
