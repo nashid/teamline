@@ -72,50 +72,40 @@ and they may not reflect the actual contribution to the grade (i.e. commits that
 don't directly increase the grade).
 
 ## Proposed solution
-Our solution is to create a derived attribute _commitContribution_ that describes
-the impact of a commit on the grade. Since the projects are graded by running them
-against a test suite (consisting of 30-60 tests), the _commitContribution_ attribute
-will take integer values indicating the change in the number of tests passing for
-each submission. We visualize this along with other code metrics (Fig. 1) to gain a more
-complete understanding of each student's contribution: those student's who made
-more commits that increased the number of passing tests should receive a higher
-retrospective grade. Note that this visualization is designed to assist the TAs in
+Our solution is to create a derived quantitative attribute _commitContribution_ that describes
+the impact of a submission on the overall grade. In particular, the attribute is
+the difference between the current submission and the previously graded one. We
+visualize this along with other code metrics (Fig. 1) to gain a more
+complete understanding of each student's contribution: those who made more grade-improving
+submissions should receive a higher retrospective grade. Note that this visualization
+is designed to assist the TAs in
 making a judgment when assigning a grade and cannot replace them since students may
-have chosen a different way to divide the work among team members. One common
-example is that one student will write unit tests for the other to pass.
+have chosen a different way to divide the work among team members.
 
-
-In the what-why-how framework
-
+### In the what-why-how framework
 **What**. Table of graded submission records (items) with the attributes described in Table 1. The dataset is static once it has
 been loaded on the page but is dynamic in that the dataset grows with each new
 submission.
 
-**Why**.
-- Compare (contributions of the team members) and derive (retrospective grade for each of them)
+**Why**. Compare the contributions of team members and derive a retrospective
+grade for each of them.
 
-**How**
-- separate individual contributions from final team result and align them on two (or three)
+**How**. Our vis includes many encodings and idioms:
+- Separate individual submissions and align them on two (or three)
   parallel axes by timestamp.
-- submissions are represented by point marks that encode the number of submissions
-  that are collapsed into a single mark (overlapping marks may be grouped into a point mark whose size encodes the number of collapsed marks)
-- marks are coloured with luminance encoding the overall grade for the submission.
-  Notice that this is relatively unimportant compared to the ability to accurately
-  compare the number and effect of submissions. This information is also available
+- Submissions are represented by area marks. Marks that overlap are collapsed into
+  a single point mark whose size encodes the number of submissions that were collapsed.
+- Marks are coloured with luminance encoding the overall grade for the submission (max luminance for a grade of 100%).
+  Note that the overall this is relatively unimportant compared to the ability to
+  accurately compare the number and effect of submissions. This information is also available
   by hovering over the point mark. For these reasons, we are okay using an encoding
   that is of low effectiveness and may not be visible on all marks.
 - key data is always visible while interaction allows details about a submission to
   be seen.
-   - hovering over a single point mark displays a popup with detail information about the submission
-   - clicking a single points opens a new tab that displays the corresponding commit on GitHub
+   - hovering over a single mark displays a popup with detailed information about the submission
+   - clicking a single points opens a new browser tab that displays the corresponding commit on GitHub
    - hovering over a grouped mark expands it to show all submissions it includes. Once expanded,
      the above interactions are allowed.
-
-
-
-- Can be used by TA to zoom into interesting commits
-- Really makes it hard for student to argue that they contributed when they didn't
-- magnified bubbles
 
 ## Scenario
 Imagine you are a TA tasked with scaling the final grade of each team member by
@@ -181,8 +171,10 @@ interesting to see how software engineering students use the git workflow to
 manage their project and collaborate with their team members.
 
 ## Milestones and schedule
-Table 2: Total time for project 108 hours.
+We are prepared to spend about 108 hours towards this project. Table 2 provides
+a breakdown of the project's tasks.
 
+Table 2:
 | Task                             | Est Time (hours) | Deadline | Description |
 | -------------------------------- | ---------------- | -------- | ----------- |
 | Pitch (x2)                       |                8 | Feb. 16  | Create slides, rehearse pitch. |
@@ -201,6 +193,7 @@ Table 2: Total time for project 108 hours.
 
 
 ## Previous work
+Our vis was inspired by
  - GitHub/BitBucket network
  - ShiViz
  - OS X Dock (for Zoom)
