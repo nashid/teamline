@@ -54,7 +54,7 @@
 %% We encourage the use of mathptmx for consistent usage of times font
 %% throughout the proceedings. However, if you encounter conflicts
 %% with other math-related packages, you may want to disable it.
-\usepackage{tablefootnote}
+\usepackage[para]{threeparttable}
 
 
 %% In preprint mode you may define your own headline.
@@ -216,9 +216,10 @@ don't directly increase the grade).
 % \end{table}
 
 \begin{table*}[t]
-  \caption{Dataset Attributes}
   \label{tab:attributes}
   \centering
+  \begin{threeparttable}
+      \caption{Dataset Attributes.}
   \begin{tabular*}{\textwidth}{lll}
     \hline
     \textbf{Attribute Name} & \textbf{Attribute Type} & \textbf{Description} \\
@@ -228,15 +229,17 @@ don't directly increase the grade).
     finalGrade     & Quantitative & Computed as 0.8*testGrade + 0.2*coverageGrade. \\
     timestamp      & Sequential   & Unix time of record creation. \\
     commitSha      & Categorical  & The (partial) SHA-1 hash of the submitted commit. \\
-    committer      & Categorical  & The GitHub ID of the student making the submission. \\
-    team           & Categorical  & The team number, stored as \textit{teamXX}, where \textit{XXX} is a number between 2 and 199. \\
+    committer      & Categorical\tnote{a}  & The GitHub ID of the student making the submission. \\
+    team           & Categorical\tnote{b}  & The team number, stored as \textit{teamXX}, where \textit{XXX} is a number between 2 and 199. \\
     deliverable    & Sequential   & The submission deliverable, which can have values \textit{d1}, \textit{d2}, or \textit{d3}. \\
     \hline
   \end{tabular*}
+  \begin{tablenotes}\footnotesize
+    \item [a] 285 values currently; max $<1000$.
+    \item [b] 139 values currently; max $<1000$.
+\end{tablenotes}
+\end{threeparttable}
 \end{table*}
-
-% \tablefootnote{285 values currently; max <1000} 
-% \tablefootnote{139 values currently; max <1000}
 
 \section{Proposed Solution}
 Our solution is to create a derived quantitative attribute \textit{commitContribution} that describes
@@ -348,7 +351,7 @@ We are prepared to spend about 108 hours towards this project. Table \ref{tab:sc
 a breakdown of the project's tasks.
 
 \begin{table*}[t]
-  \caption{Task Schedule}
+  \caption{Task Schedule.}
   \label{tab:schedule}
   \centering
   \begin{tabular*}{\textwidth}{lrll}%{l r l l}@{\extracolsep{\fill}}
