@@ -267,13 +267,10 @@ grade for each of them.
         parallel axes by timestamp.
   \item Submissions are represented by area marks. Marks that overlap are collapsed into
     a single point mark whose size encodes the number of submissions that were collapsed.
-  \item Marks are coloured with luminance encoding the overall grade for the submission (max luminance for a grade of 100%).
-    Note that the overall this is relatively unimportant compared to the ability to
-    accurately compare the number and effect of submissions. This information is also available
-    by hovering over the point mark. For these reasons, we are okay using an encoding
-    that is of low effectiveness and may not be visible on all marks.
-  \item Key data is always visible while interaction allows details about a submission to
-    be seen:
+  \item Marks are coloured with saturation encoding the overall grade for the submission (max saturation for a grade of 100\%).
+    We are okay with using a lower effectiveness encoding which may not be visible on marks showing only a single submission
+    because the final grade is not the focus of this vis.
+  \item Interaction allows details about a submission to be seen:
     \begin{itemize}
       \item Hovering over a single mark displays a popup with detailed information about the submission.
       \item Clicking a single points opens a new browser tab that displays the corresponding commit on GitHub.
@@ -288,34 +285,34 @@ the amount they contributed. Upon meeting the team, you open their Teamline to
 get a sense of the team dynamics: did they start early? did they work consistently?
 what was their final grade? This information is immediately available to you
 because Teamline defaults to showing the team-view of the most recently due deliverable (Fig. \ref{fig:teaser}).
-Within the view, the you find that the team made a few early submissions that
+Within the view, you find that the team made a few early submissions that
 increased their grade and then made a large number of submissions very close to
 the deadline. From the navigation pane, you notice that one of the team members
 contributed significantly to final grade unlike the other.
 
 You then proceed to discuss with each team member individually about their contributions
-to the project. The one who made the larger contribution according to Teamline, Bob,
+to the project. The one who made the larger contribution according to Teamline, User1,
 had a clear understanding of the code and was able to discuss a couple of challenges
-he encountered. At the end of the retrospective, Bob said that each of them had
+he encountered. At the end of the retrospective, User1 said that each of them had
 done the work they agreed to do (which they thought was an even split) but that
 his partner started very late which made him apprehensive.
 To confirm this, you expand the team-view (Fig. \ref{fig:studentview}) to show individual submissions made by
 each team member and do in fact notice that all of the submissions for the other
-member, Joe, were made the night before the due date and that Bobs submissions were
+member, User2, were made the night before the due date and that User1's submissions were
 made earlier and more consistently.
 
-Next, you talk to Joe. After he explains what he contributed, you mention that by
-starting so late, it may negatively impact the group dynamic. Joe refutes this by claiming
+Next, you talk to User2. After he explains what he contributed, you mention that by
+starting so late, it may negatively impact the group dynamic. User2 denies this by claiming
 that he started days earlier but, after you show him Teamline, agrees that he should
-start earlier next time. While looking at Teamline, you also notice that Bob did
+start earlier next time. While looking at Teamline, you also notice that User1 did
 quite a bit more work for the previous deliverable as well. You point this out to
-both Bob and Joe and they are a bit surprised. You help them divide up the work
+both User1 and User2 and they are a bit surprised. You help them divide up the work
 for the next deliverable more equitably.
 
 Later in the week, you decide to check how the team is proceeding. You immediately
 see that several submissions were made. Curious to see if your discussion helped,
-you expand the team-view and see that Joe has already made several submissions.
-You feel much more confident having scaled back Joe's grade by only 20% since he
+you expand the team-view and see that User2 has already made several submissions.
+You feel much more confident having scaled back User2's grade by only 20\% since he
 is now contributing more.
 
 \begin{figure}[h]
@@ -329,23 +326,23 @@ is now contributing more.
 
 \section{Implementation Approach}
 We have decided to implement Teamline as a web application. We decided on this for
-a variety of reasons: our familiarity with web technologies, platform independence,
+a variety of reasons: our familiarity with web technologies (especially JavaScript), platform independence,
 increase likelihood of adoption in CPSC310 (and other courses that will be using AutoTest),
 and integration with other service used in the course. Teamline is minimally dependent
 on existing AutoTest infrastructure, only requiring access to the database via a
-REST endpoint, and is completely novel of the existing system including the dashboard.
+REST endpoint, and is completely novel of the existing system.
 
-Given the above, we will use HTML5, CSS3 and jQuery to implement our vis. With the
-advances in CSS, we believe we will not need a vis-specific library like D3.js but
-we will finalize this decision once we have started coding.
+% Given the above, we will use HTML5, CSS3 and jQuery to implement our vis. With the
+% advances in CSS, we believe we will not need a vis-specific library like D3.js but
+% we will finalize this decision once we have started coding.
 
 \section{Expertise}
 We decided on this project, in part, because we are both currently TAs for CPSC310
 and have experienced the challenges of assigning a fair retrospective grade. In
 addition, we are both excited to make use of the otherwise largely unused data.
 
-In addition, Nick wrote and is currently managing the AutoTest system including
-the database. As such, he has a total understanding of the data: how it was created,
+In addition, we wrote and are currently managing the AutoTest system including
+the database. As such, we have an understanding of the data: how it was created,
 its limitations, and some ways it can be meaningfully linked with other data sources
 like GitHub.
 
@@ -354,11 +351,7 @@ is in our research area of software engineering. At a high level, it will be
 interesting to see how software engineering students use the git workflow to
 manage their project and collaborate with their team members.
 
-\section{Milestones and Schedule}
-We are prepared to spend about 108 hours towards this project. Table \ref{tab:schedule} provides
-a breakdown of the project's tasks.
-
-\begin{table*}[t]
+\begin{table}[!htbp]
   \caption{Task Schedule.}
   \label{tab:schedule}
   \centering
@@ -372,18 +365,36 @@ a breakdown of the project's tasks.
     Interim writeup                  &  6 & Mar. 31  & Summary of progress, completed previous work section. \\
     Project Review 2                 &  2 & Apr. 2   & Prepare slides, have some version of demo ready. \\
     Implementation                   & 48 & Apr. 7   & Completed vis tool. \\
-     - Create database view          &  4 & Mar. 14  & Create view(s) of computed/derived attributes in CouchDB. \\
-     - Create tabs/buttons           &  4 & Mar. 21  & Set up project frontend. Create navigation buttons. \\
+     - Create database view          &  8 & Mar. 14  & Create view(s) of computed/derived attributes in CouchDB. \\
+     - Create tabs/buttons           &  8 & Mar. 21  & Set up project frontend. Create navigation buttons. \\
      - Main vis (team view)          & 25 & Mar. 31  & Implement team view including fetching data, display/layout,  interaction, animation. \\
      - Main vis (student view)       & 15 & Apr. 7   & Implement student view. Some of the team view implementation should be reusable. \\
     Presentation                     & 10 & Apr. 25  & Prepare slides, demo, video(?). Rehearse. \\
     Final paper                      & 20 & Apr. 28  & Finalize paper. Draft to be written Apr. 10-18. \\
     \hline
   \end{tabular*}
-\end{table*}
+\end{table}
+
+\section{Milestones and Schedule}
+We are prepared to spend about 116 hours towards this project. Table \ref{tab:schedule} provides
+a breakdown of the project's tasks.
+
+
 
 \section{Previous Work}
+Our vis was inspired by ShiViz\footnote{https://bestchai.bitbucket.io/shiviz/?} which shows messages being passed among
+a collection of processes to verify the happens-before relation is not violated,
+commit graphs like the one built into BitBucket\footnote{https://marketplace.atlassian.com/plugins/com.plugin.commitgraph.commitgraph/server/overview}
+which visualize commits in time, the map view on Craigslist\footnote{https://vancouver.craigslist.ca/search/hhh} which shows size-encoded point marks, and the magnifying effect for the OS X dock.
 
+In addition, research around team contribution and collaboration (e.g. \cite{Kelly:2016}) could help us further refine Teamline.
+
+
+%
+% Related:
+% https://worvilleanalysis.wordpress.com/2015/09/13/visualizing-and-measuring-defensive-contribution/
+% http://dl.acm.org/citation.cfm?doid=2818048.2819977 (Can Visualization of Contributions Support Fairness in Collaboration?: Findings from Meters in an Online Game)
+%
 
 
 \bibliographystyle{abbrv}
