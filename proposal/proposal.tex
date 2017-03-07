@@ -161,12 +161,12 @@
 
 %% \section{Introduction} %for journal use above \firstsection{..} instead
 
-Our tool visualizes data collected from AutoTest\footnote{http://github.com/nickbradley/autotest},
+Our tool visualizes data collected by AutoTest\footnote{http://github.com/nickbradley/autotest},
 an automatic grading service used to grade code submissions for students in
 CPSC310. The course is structured around a term-long coding project that is
-divided into 5 deliverables/sprints, only the first 3 of which are graded by a
-combination of AutoTest and TA, completed by teams consisting of 2-3 students.
-The teams manage their shared code on GitHub\footnote{http://github.com}
+divided into 5 deliverables/sprints completed by teams consisting of 2-3 students.
+The first 3 of these deliverables are graded by a combination of AutoTest and TAs.
+Teams manage their shared code on GitHub\footnote{http://github.com}
 using a basic git workflow: students pull the latest code changes from GitHub,
 commit their modified code locally and then push those commits to GitHub for
 other members to see. Every time a student pushes their changes, AutoTest is
@@ -181,9 +181,9 @@ After a submission deadline, TAs meet with their assigned
 teams to conduct a retrospective to discuss any challenges that arose
 during the sprint and to ensure that the work was equitably distributed among the
 team members. This typically consists of a TA asking some questions designed to
-gauge a student's comprehension of the task and code. We may go so far as to
+gauge a student's comprehension of the task and code. They may go so far as to
 explicitly and privately ask each student how evenly they felt the workload was
-split. The TAs assign a scaling factor to the deliverable grade. For example, if
+split. Based on the retrospective, the TAs assign a scaling factor to the deliverable grade. For example, if
 the team got 90\% on the deliverable but one member did most of the work, the final
 grades might be 90\%*1.0 = 90\% and 90\%*0.6 = 54\%. Unfortunately, it can be hard
 to determine how much work was done by each student from these conversations since
@@ -258,7 +258,7 @@ Here we use the what-why-how framework \cite{Munzner:2014} to abstract our solut
 described in Table 1. The dataset is static once it has been loaded on the page
 but is dynamic in that the dataset grows with each new submission.
 
-\textbf{Why}.Compare the contributions of team members and derive a retrospective
+\textbf{Why}. Compare the contributions of team members and derive a retrospective
 grade for each of them.
 
 \textbf{How}. Our vis includes many encodings and idioms:
@@ -273,7 +273,7 @@ grade for each of them.
   \item Interaction allows details about a submission to be seen:
     \begin{itemize}
       \item Hovering over a single mark displays a popup with detailed information about the submission.
-      \item Clicking a single points opens a new browser tab that displays the corresponding commit on GitHub.
+      \item Clicking a single point opens a new browser tab that displays the corresponding commit on GitHub.
       \item Hovering over a grouped mark expands it to show all submissions it includes. Once expanded,
         the above interactions are allowed.
     \end{itemize}
@@ -282,13 +282,13 @@ grade for each of them.
 \section{Scenario}
 Imagine you are a TA tasked with scaling the final grade of each team member by
 the amount they contributed. Upon meeting the team, you open their Teamline to
-get a sense of the team dynamics: did they start early? did they work consistently?
-what was their final grade? This information is immediately available to you
+get a sense of the team dynamics: Did they start early? Did they work consistently?
+What was their final grade? This information is immediately available to you
 because Teamline defaults to showing the team-view of the most recently due deliverable (Fig. \ref{fig:teaser}).
 Within the view, you find that the team made a few early submissions that
 increased their grade and then made a large number of submissions very close to
-the deadline. From the navigation pane, you notice that one of the team members
-contributed significantly to final grade unlike the other.
+the deadline. From the navigation pane, you notice that only one of the team members
+contributed significantly to the final grade.
 
 You then proceed to discuss with each team member individually about their contributions
 to the project. The one who made the larger contribution according to Teamline, User1,
@@ -327,10 +327,10 @@ is now contributing more.
 \section{Implementation Approach}
 We have decided to implement Teamline as a web application. We decided on this for
 a variety of reasons: our familiarity with web technologies (especially JavaScript), platform independence,
-increase likelihood of adoption in CPSC310 (and other courses that will be using AutoTest),
-and integration with other service used in the course. Teamline is minimally dependent
+increased likelihood of adoption in CPSC310 (and other courses that will be using AutoTest),
+and integration with other services used in the course. Teamline is minimally dependent
 on existing AutoTest infrastructure, only requiring access to the database via a
-REST endpoint, and is completely novel of the existing system.
+REST endpoint, and is completely novel to the existing system.
 
 % Given the above, we will use HTML5, CSS3 and jQuery to implement our vis. With the
 % advances in CSS, we believe we will not need a vis-specific library like D3.js but
@@ -341,7 +341,7 @@ We decided on this project, in part, because we are both currently TAs for CPSC3
 and have experienced the challenges of assigning a fair retrospective grade. In
 addition, we are both excited to make use of the otherwise largely unused data.
 
-In addition, we wrote and are currently managing the AutoTest system including
+Furthermore, we wrote and are currently managing the AutoTest system including
 the database. As such, we have an understanding of the data: how it was created,
 its limitations, and some ways it can be meaningfully linked with other data sources
 like GitHub.
@@ -367,8 +367,8 @@ manage their project and collaborate with their team members.
     Implementation                   & 48 & Apr. 7   & Completed vis tool. \\
      - Create database view          &  8 & Mar. 14  & Create view(s) of computed/derived attributes in CouchDB. \\
      - Create tabs/buttons           &  8 & Mar. 21  & Set up project frontend. Create navigation buttons. \\
-     - Main vis (team view)          & 25 & Mar. 31  & Implement team view including fetching data, display/layout,  interaction, animation. \\
-     - Main vis (student view)       & 15 & Apr. 7   & Implement student view. Some of the team view implementation should be reusable. \\
+     - Main vis (Fig. \ref{fig:teaser})          & 25 & Mar. 31  & Implement team view including fetching data, display/layout,  interaction, animation. \\
+     - Main vis (Fig. \ref{fig:studentview})       & 15 & Apr. 7   & Implement student view. Some of the team view implementation should be reusable. \\
     Presentation                     & 10 & Apr. 25  & Prepare slides, demo, video(?). Rehearse. \\
     Final paper                      & 20 & Apr. 28  & Finalize paper. Draft to be written Apr. 10-18. \\
     \hline
@@ -376,7 +376,7 @@ manage their project and collaborate with their team members.
 \end{table}
 
 \section{Milestones and Schedule}
-We are prepared to spend about 116 hours towards this project. Table \ref{tab:schedule} provides
+We are prepared to spend about 116 hours together towards this project. Table \ref{tab:schedule} provides
 a breakdown of the project's tasks.
 
 
