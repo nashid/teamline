@@ -1,2 +1,2 @@
-# 547project
-Course project for CPSC547
+# Teamline: Visualizing small team code contributions
+![alt](proposal/images/team-view-mockup.png)
