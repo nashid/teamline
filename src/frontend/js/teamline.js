@@ -1,5 +1,9 @@
 var Teamline = (function() {
 
+	var CHARTS = {
+		'LineChart': 'lineChart'
+	};
+
 	function chart(chartType, options) {
 
 		var defaults = {
@@ -14,8 +18,8 @@ var Teamline = (function() {
 		options = $.extend(defaults, options);
 
 		nv.addGraph(function() {
-
-			var chartObj = nv.models[chartType]();
+			var chartFnName = CHARTS[chartType];
+			var chartObj = nv.models[chartFnName]();
 			var d3Obj = d3.select(options.container).datum(options.data);
 
 			if (options.width) {

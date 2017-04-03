@@ -1,6 +1,18 @@
 (function() {
 
-	d3.json("data/linePlusBarData.json", function(error, data) {
+	d3.json("data/team78.json", function(error, data) {
+
+		var usersCommitData = data.deliverables.d1.users;
+		var userNames = Object.keys(usersCommitData).sort();
+		var user1Data = usersCommitData[userNames[0]].beforeDeadline;
+		var user2Data = usersCommitData[userNames[1]].beforeDeadline;
+
+		var user1Contribution = [];
+		var accumulated = 0;
+		$.each(user1Data, function() {
+
+		});
+
 
 		function beforeDraw(env) {
 			var chart = env.nvd3Obj;
