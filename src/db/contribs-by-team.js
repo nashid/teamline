@@ -1,5 +1,5 @@
 x = function(doc) {
-  if (doc.deliverable >= "d1" && (doc.team === "team127" || doc.team === "team128")) {
+  if (doc.deliverable >= "d1") {
     var tGrade = ( (doc.testStats && doc.testStats.passPercent) ? doc.testStats.passPercent : 0 );
     var cGrade = ( (doc.coverStats && doc.coverStats.lines && doc.coverStats.lines.percentage) ? Math.min(doc.coverStats.lines.percentage+5, 100) : 0 );
 

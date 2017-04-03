@@ -12,129 +12,173 @@ contribs = function(head, req) {
 
 
   provides("json", function() {
-    results = [];
-    prev = null;
-    i = 0;
+    var results = [];
+    var prev = null;
+    var i = 0;
+    var deliverable = {
+      "allTestNames": [],
+      "everPass": [],
+      "maxCoverage": 0,
+      "finalGrade": 0,
+      "testGrade": 0,
+      "coverageGrade": 0
+    };
+
 
     // Team-specific
-    users = {};
-    deliverables = {};
-    currDeliverable = {};
+    var users = {};
+    var deliverables = {};
+    var currDeliverable = JSON.parse(JSON.stringify(deliverable)); // deep copy
 
     while (row = getRow()) {
-      curr = row.value;
+      var curr = row.value;
 
       if (i == 0)
         prev = curr;
 
-
       if (prev.team !== curr.team) {
+        var userKeys = Object.keys(users);
+        var totalPassContrib = Object.keys(users).reduce(function(acc, key) {
+          return acc + users[key].beforeDeadline.contribution.passCount;
+        }, 0);
+        var totalCoverContrib = Object.keys(users).reduce(function(acc, key) {
+          return acc + users[key].beforeDeadline.contribution.coverage;
+        }, 0);
+
+        userKeys.forEach(function(key) {
+          var testPct = users[key].beforeDeadline.contribution.passCount*100/totalPassContrib;
+          var coverPct = users[key].beforeDeadline.contribution.coverage*100/totalCoverContrib;
+
+          users[key].beforeDeadline.contribution["tests"] = +testPct.toFixed(4);
+          users[key].beforeDeadline.contribution["overall"] = +(0.8*testPct + 0.2*coverPct).toFixed(4);
+        });
+
+        deliverables[prev.deliverable] = {
+          "due": deadlines[prev.deliverable],
+          "testNames": currDeliverable.allTestNames,
+          "finalGrade": +currDeliverable.finalGrade,
+          "testGrade": +currDeliverable.testGrade,
+          "coverageGrade": +currDeliverable.coverGrade,
+          "users": users
+        }
+
         results.push({
           "team": prev.team,
           "deliverables": deliverables
         });
 
         users = {};
+        currDeliverable = JSON.parse(JSON.stringify(deliverable));
         deliverables = {};
-        currDeliverable = {};
       }
 
+      if (prev.deliverable !== curr.deliverable) {
+        var userKeys = Object.keys(users);
+        var totalPassContrib = Object.keys(users).reduce(function(acc, key) {
+          return acc + users[key].beforeDeadline.contribution.passCount;
+        }, 0);
+        var totalCoverContrib = Object.keys(users).reduce(function(acc, key) {
+          return acc + users[key].beforeDeadline.contribution.coverage;
+        }, 0);
 
+        userKeys.forEach(function(key) {
+          var testPct = users[key].beforeDeadline.contribution.passCount*100/totalPassContrib;
+          var coverPct = users[key].beforeDeadline.contribution.coverage*100/totalCoverContrib;
 
+          users[key].beforeDeadline.contribution["tests"] = +testPct.toFixed(4);
+          users[key].beforeDeadline.contribution["overall"] = +(0.8*testPct + 0.2*coverPct).toFixed(4);
+        });
 
-
-      if (!currDeliverable[curr.deliverable]) {
-        currDeliverable[curr.deliverable] = {
-          "allTestNames": [],
-          "everPass": [],
-          "maxCoverage": 0
-        };
+        deliverables[prev.deliverable] = {
+          "due": deadlines[prev.deliverable],
+          "testNames": currDeliverable.allTestNames,
+          "finalGrade": +currDeliverable.finalGrade,
+          "testGrade": +currDeliverable.testGrade,
+          "coverageGrade": +currDeliverable.coverGrade,
+          "users": users
+        }
+        users = {};
+        currDeliverable = JSON.parse(JSON.stringify(deliverable));
       }
+
 
       // Some test names might not show up until later commits because tests can added during the deliverable. Sigh.
       // It is important that we *NOT* sort the names since it will throw off the index of earlier commits.
       var testNames = curr.passNames.concat(curr.skipNames).concat(curr.failNames);
       testNames.forEach(function(name) {
-        if (currDeliverable[curr.deliverable].allTestNames.indexOf(name) < 0)
-          currDeliverable[curr.deliverable].allTestNames.push(name);
+        if (currDeliverable.allTestNames.indexOf(name) < 0)
+          currDeliverable.allTestNames.push(name);
       });
 
 
 
       var newPassTests = curr.passNames.filter(function(name) {
         // test is new if it is not in everPass
-        return currDeliverable[curr.deliverable].everPass.indexOf(name) < 0;
+        return currDeliverable.everPass.indexOf(name) < 0;
       });
-      var passContribution = newPassTests.length;
-      var coverContribution = Math.max(0,curr.coverGrade-currDeliverable[curr.deliverable].maxCoverage);
+      var passContribCount = newPassTests.length;
+      var coverContribution = Math.max(0,curr.coverGrade-currDeliverable.maxCoverage);
       // NOT correct - not actual grade
       // var contrib = 0.8*passContribution + 0.2*coverContribution;
 
-      currDeliverable[curr.deliverable].everPass = currDeliverable[curr.deliverable].everPass.concat(newPassTests);
-      currDeliverable[curr.deliverable].maxCoverage = Math.max(curr.coverGrade,currDeliverable[curr.deliverable].maxCoverage);
-
-
-
-
-
+      currDeliverable.everPass = currDeliverable.everPass.concat(newPassTests);
+      currDeliverable.maxCoverage = Math.max(curr.coverGrade,currDeliverable.maxCoverage);
 
       commit = {
         "commitSha": curr.commitSha,
         "timestamp": curr.timestamp,
-        "passContribution": passContribution,
-        "coverContribution": coverContribution,
         "grade": curr.finalGrade,
         "coverage": curr.coverGrade,
+        "coverageContrib": coverContribution,
         "passCount": curr.passCount,
+        "passCountNew": passContribCount,
         "skipCount": curr.skipCount,
         "failCount": curr.failCount,
         "passTests": curr.passNames.map(function(testName) {
-          return currDeliverable[curr.deliverable].allTestNames.indexOf(testName);
+          return currDeliverable.allTestNames.indexOf(testName);
         }),
         "skipTests": curr.skipNames.map(function(testName) {
-          return currDeliverable[curr.deliverable].allTestNames.indexOf(testName);
+          return currDeliverable.allTestNames.indexOf(testName);
         }),
         "failTests": curr.failNames.map(function(testName) {
-          return currDeliverable[curr.deliverable].allTestNames.indexOf(testName);
+          return currDeliverable.allTestNames.indexOf(testName);
         })
       }
 
-      if (!deliverables[curr.deliverable])
-        deliverables[curr.deliverable] = {};
 
-      var delvCommitters = deliverables[curr.deliverable];
-      if (!delvCommitters[curr.user]) {
-        delvCommitters[curr.user] = {
-          "passContribution": passContribution,
-          "coverContribution": coverContribution,
-          "commits": [commit]
-        }
+      if (!users[curr.user]) {
+        users[curr.user] = {
+          "beforeDeadline": {
+            "contribution":{
+              "coverage": 0,
+              "passCount": 0
+            },
+            "commits": []
+          },
+          "afterDeadline": {
+            "contribution":{
+              "coverage": 0,
+              "passCount": 0
+            },
+            "commits": []
+          }
+        };
+      }
+      if (curr.timestamp <= deadlines[curr.deliverable]) {
+        users[curr.user].beforeDeadline.contribution.passCount += passContribCount;
+        users[curr.user].beforeDeadline.contribution.coverage += coverContribution;
+        users[curr.user].beforeDeadline.commits.push(commit);
+
+        currDeliverable.finalGrade = curr.finalGrade;
+        currDeliverable.testGrade = curr.testGrade;
+        currDeliverable.coverGrade = curr.coverGrade;
       }
       else {
-        delvCommitters[curr.user].passContribution += passContribution;
-        delvCommitters[curr.user].coverContribution += coverContribution;
-        delvCommitters[curr.user].commits.push(commit);
+        users[curr.user].afterDeadline.contribution.passCount += passContribCount;
+        users[curr.user].afterDeadline.contribution.coverage += coverContribution;
+        users[curr.user].afterDeadline.commits.push(commit);
       }
 
-
-      // if (deliverables[curr.deliverable]) {
-      //   deliverable = deliverables[curr.deliverable];
-      //   if (deliverable[curr.user]) {
-      //     deliverable[curr.user].contrib += contrib;
-      //     deliverable[curr.user].commits.push(commit);
-      //   } else {
-      //     deliverable[curr.user] = {
-      //       "contribution": contrib,
-      //       "commits": [commit]
-      //     };
-      //   }
-      // } else {
-      //   deliverables[curr.deliverable] = {};
-      //   deliverables[curr.deliverable][curr.user] = {
-      //     "contribution": contrib,
-      //     "commits": [commit]
-      //   };
-      // }
 
       prev = curr;
       i++;
