@@ -1,4 +1,39 @@
-/* line 2, teamline.scss */
-.nv-axis.nv-x {
-  display: none;
+/* line 7, teamline.scss */
+body {
+  margin: 0;
+}
+
+/* line 12, teamline.scss */
+#chart .nvd3-svg .nv-point {
+  stroke-opacity: 1;
+  stroke-width: 5px;
+  fill-opacity: 1;
+}
+/* line 18, teamline.scss */
+#chart .duedate-line {
+  stroke: solid;
+  stroke-dasharray: 5,5;
+}
+/* line 26, teamline.scss */
+#chart .nv-axis.nv-y g.tick text {
+  font-weight: normal;
+}
+/* line 31, teamline.scss */
+#chart .nv-axis.nv-y g.tick:nth-last-of-type(1) text {
+  font-weight: bold;
+}
+/* line 34, teamline.scss */
+#chart .nv-axis.nv-y g.tick:nth-last-of-type(1) line {
+  stroke-width: 3px;
+  stroke: #aaa;
+  stroke-dasharray: 5,5;
+}
+/* line 45, teamline.scss */
+#chart .nv-axis.nv-x .tick.zero line {
+  stroke-width: 3px;
+  stroke: #bbb;
+}
+/* line 53, teamline.scss */
+#chart .nv-axis .nv-axisMaxMin text {
+  font-weight: normal;
 }

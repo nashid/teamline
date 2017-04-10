@@ -1,5 +1,58 @@
-.nv-axis {
-  &.nv-x {
-    display: none;
+//.nv-axis {
+//  &.nv-x {
+//    display: none;
+//  }
+//}
+
+body {
+  margin: 0;
+}
+
+#chart {
+  .nvd3-svg .nv-point {
+    stroke-opacity: 1;
+    stroke-width: 5px;
+    fill-opacity: 1;
+  }
+
+  .duedate-line {
+    stroke: solid;
+    stroke-dasharray: 5,5;
+  }
+
+  .nv-axis {
+    &.nv-y {
+      g.tick {
+        text {
+          font-weight: normal;
+        }
+
+        &:nth-last-of-type(1) {
+          text {
+            font-weight: bold;
+          }
+          line {
+            stroke-width: 3px;
+            stroke: #aaa;
+            stroke-dasharray: 5,5;
+          }
+        }
+      }
+    }
+
+    &.nv-x {
+      .tick.zero {
+        line {
+          stroke-width: 3px;
+          stroke: #bbb;
+        }
+      }
+    }
+
+    .nv-axisMaxMin {
+      text {
+        font-weight: normal;
+      }
+    }
   }
 }
