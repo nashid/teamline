@@ -10,19 +10,17 @@
         <script src="js/lib/d3.v3.min.js"></script>
         <script src="js/lib/nv.d3.min.js"></script>
         <script src="js/lib/jquery-3.2.0.min.js"></script>
-        <!--<script src="js/linechart-example.js"></script>-->
     </head>
     <body>
 
         <div id="teamline">
-            <div id="teamline-buttons">
-
-            </div>
+            <div id="teamline-buttons"></div>
+            <div id="teamline-overview"><table></table></div>
             <div id="teamline-chart">
+                <a class="back-to-overview" href="#">Back to Overview</a>
                 <svg></svg>
             </div>
         </div>
-
 
         <script id="tooltip-template" type="text/x-handlebars-template">
             <div class="teamline-tooltip">
@@ -37,11 +35,11 @@
         <script id="buttons-template" type="text/x-handlebars-template">
             <div class="btn-group" role="group">
                 {{#each buttons}}
-                <button data-key="{{this.key}}" type="button" class="btn btn-default {{classes}}">{{this.label}}</button>
+                <button data-deliverable="{{this.deliverable}}" type="button" class="btn btn-default {{classes}}">{{this.label}}</button>
                 {{/each}}
             </div>
         </script>
 
-        <script src="js/teamline-init.js"></script>
+        <script src="js/teamline.js"></script>
     </body>
 </html>

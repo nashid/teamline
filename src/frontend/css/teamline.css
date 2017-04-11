@@ -3,83 +3,119 @@ body {
   margin-top: 20px;
 }
 
-/* line 6, teamline.scss */
-.teamline-tooltip ul {
-  margin: 0;
-  padding: 5px;
+/* line 7, teamline.scss */
+#teamline[data-view="team"] #teamline-overview {
+  display: none;
 }
-/* line 10, teamline.scss */
-.teamline-tooltip ul li {
-  list-style-type: none;
-}
-/* line 13, teamline.scss */
-.teamline-tooltip ul li .label {
-  font-size: 100%;
-  color: black;
-  padding-right: 5px;
-  font-weight: bold;
+/* line 12, teamline.scss */
+#teamline[data-view="overview"] #teamline-chart {
+  display: none;
 }
 
-/* line 27, teamline.scss */
+/* line 18, teamline.scss */
 #teamline-buttons {
   text-align: center;
 }
-/* line 30, teamline.scss */
+/* line 21, teamline.scss */
 #teamline-buttons button:focus {
   outline: none;
 }
 
+/* line 27, teamline.scss */
+#teamline-overview {
+  padding: 20px 50px;
+}
+/* line 29, teamline.scss */
+#teamline-overview table {
+  width: 100%;
+}
+/* line 32, teamline.scss */
+#teamline-overview table td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+  color: #444;
+}
 /* line 37, teamline.scss */
+#teamline-overview table td:hover {
+  background-color: #aaa !important;
+  color: white;
+  cursor: pointer;
+}
+
+/* line 46, teamline.scss */
+#teamline-chart {
+  padding-top: 6px;
+  text-align: center;
+}
+/* line 50, teamline.scss */
 #teamline-chart svg {
   margin: 0 auto;
 }
-/* line 41, teamline.scss */
+/* line 54, teamline.scss */
 #teamline-chart .nv-lineChart {
-  transform: translate(80px, 25px);
+  transform: translate(80px, 0);
 }
-/* line 45, teamline.scss */
+/* line 58, teamline.scss */
 #teamline-chart .nv-legendWrap {
   transform: translate(17px, 0);
 }
-/* line 49, teamline.scss */
+/* line 62, teamline.scss */
 #teamline-chart .nvd3-svg .nv-point {
   stroke-opacity: 1;
   stroke-width: 5px;
   fill-opacity: 1;
 }
-/* line 55, teamline.scss */
+/* line 68, teamline.scss */
 #teamline-chart .duedate-line {
   stroke: solid;
   stroke-dasharray: 5,5;
 }
-/* line 63, teamline.scss */
+/* line 76, teamline.scss */
 #teamline-chart .nv-axis.nv-y g.tick text {
   font-weight: normal;
 }
-/* line 68, teamline.scss */
+/* line 81, teamline.scss */
 #teamline-chart .nv-axis.nv-y g.tick:nth-of-type(1) text {
   display: none;
 }
-/* line 74, teamline.scss */
+/* line 87, teamline.scss */
 #teamline-chart .nv-axis.nv-y g.tick:nth-last-of-type(2) text {
   font-weight: bold;
 }
-/* line 77, teamline.scss */
+/* line 90, teamline.scss */
 #teamline-chart .nv-axis.nv-y g.tick:nth-last-of-type(2) line {
   stroke-width: 3px;
   stroke: #aaa;
   stroke-dasharray: 5,5;
 }
-/* line 88, teamline.scss */
+/* line 101, teamline.scss */
 #teamline-chart .nv-axis.nv-x .tick.zero line {
   stroke-width: 3px;
   stroke: #bbb;
 }
-/* line 96, teamline.scss */
+/* line 109, teamline.scss */
 #teamline-chart .nv-axis .nv-axisMaxMin text {
   font-weight: normal;
 }
-/* line 99, teamline.scss */
+/* line 112, teamline.scss */
 #teamline-chart .nv-axis .nv-axisMaxMin.nv-axisMaxMin-y {
   display: none;
+}
+
+/* line 120, teamline.scss */
+.teamline-tooltip ul {
+  margin: 0;
+  padding: 5px;
+}
+/* line 124, teamline.scss */
+.teamline-tooltip ul li {
+  list-style-type: none;
+}
+/* line 127, teamline.scss */
+.teamline-tooltip ul li .label {
+  font-size: 100%;
+  color: black;
+  padding-right: 5px;
+  font-weight: bold;
 }
