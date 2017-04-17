@@ -9,6 +9,18 @@ contribs = function(head, req) {
     "d3": 1489417200000
   };
 
+  var dates = {
+    "release": {
+      "d1": 1484755200000,
+      "d2": 1487001600000,
+      "d3": 1488643200000
+    },
+    "due": {
+      "d1": 1486396800000,
+      "d2": 1488211200000,
+      "d3": 1489417200000
+    }
+  }
 
 
   provides("json", function() {
@@ -36,69 +48,25 @@ contribs = function(head, req) {
       if (i == 0)
         prev = curr;
 
-      if (prev.team !== curr.team) {
-        var userKeys = Object.keys(users);
-        var totalPassContrib = Object.keys(users).reduce(function(acc, key) {
-          return acc + users[key].beforeDeadline.contribution.passCount;
-        }, 0);
-        var totalCoverContrib = Object.keys(users).reduce(function(acc, key) {
-          return acc + users[key].beforeDeadline.contribution.coverage;
-        }, 0);
-
-        userKeys.forEach(function(key) {
-          var testPct = users[key].beforeDeadline.contribution.passCount*100/totalPassContrib;
-          var coverPct = users[key].beforeDeadline.contribution.coverage*100/totalCoverContrib;
-
-          users[key].beforeDeadline.contribution["tests"] = +testPct.toFixed(4);
-          users[key].beforeDeadline.contribution["overall"] = +(0.8*testPct + 0.2*coverPct).toFixed(4);
-        });
-
+      if (prev.deliverable !== curr.deliverable || prev.team !== curr.team) {
         deliverables[prev.deliverable] = {
-          "due": deadlines[prev.deliverable],
-          "testNames": currDeliverable.allTestNames,
-          "finalGrade": +currDeliverable.finalGrade,
-          "testGrade": +currDeliverable.testGrade,
-          "coverageGrade": +currDeliverable.coverGrade,
-          "users": users
-        }
-
-        results.push({
-          "team": prev.team,
-          "deliverables": deliverables
-        });
-
+          "released": dates.release[prev.deliverable],
+					"due": dates.due[prev.deliverable],
+					"testNames": currDeliverable.allTestNames,
+					"finalGrade": +currDeliverable.finalGrade,
+					"testGrade": +currDeliverable.testGrade,
+					"coverageGrade": +currDeliverable.coverGrade,
+					"users": aggregateDeliverable(users)
+				};
         users = {};
         currDeliverable = JSON.parse(JSON.stringify(deliverable));
-        deliverables = {};
-      }
-
-      if (prev.deliverable !== curr.deliverable) {
-        var userKeys = Object.keys(users);
-        var totalPassContrib = Object.keys(users).reduce(function(acc, key) {
-          return acc + users[key].beforeDeadline.contribution.passCount;
-        }, 0);
-        var totalCoverContrib = Object.keys(users).reduce(function(acc, key) {
-          return acc + users[key].beforeDeadline.contribution.coverage;
-        }, 0);
-
-        userKeys.forEach(function(key) {
-          var testPct = users[key].beforeDeadline.contribution.passCount*100/totalPassContrib;
-          var coverPct = users[key].beforeDeadline.contribution.coverage*100/totalCoverContrib;
-
-          users[key].beforeDeadline.contribution["tests"] = +testPct.toFixed(4);
-          users[key].beforeDeadline.contribution["overall"] = +(0.8*testPct + 0.2*coverPct).toFixed(4);
-        });
-
-        deliverables[prev.deliverable] = {
-          "due": deadlines[prev.deliverable],
-          "testNames": currDeliverable.allTestNames,
-          "finalGrade": +currDeliverable.finalGrade,
-          "testGrade": +currDeliverable.testGrade,
-          "coverageGrade": +currDeliverable.coverGrade,
-          "users": users
+        if (prev.team !== curr.team) {
+          results.push({
+            "team": prev.team,
+            "deliverables": deliverables
+          });
+          deliverables = {};
         }
-        users = {};
-        currDeliverable = JSON.parse(JSON.stringify(deliverable));
       }
 
 
@@ -117,7 +85,7 @@ contribs = function(head, req) {
         return currDeliverable.everPass.indexOf(name) < 0;
       });
       var passContribCount = newPassTests.length;
-      var coverContribution = Math.max(0,curr.coverGrade-currDeliverable.maxCoverage);
+      var coverContribution = +Math.max(0,curr.coverGrade-currDeliverable.maxCoverage).toFixed(4);
       // NOT correct - not actual grade
       // var contrib = 0.8*passContribution + 0.2*coverContribution;
 
@@ -132,6 +100,7 @@ contribs = function(head, req) {
         "coverageContrib": coverContribution,
         "passCount": curr.passCount,
         "passCountNew": passContribCount,
+				"passPctNew": 0,
         "skipCount": curr.skipCount,
         "failCount": curr.failCount,
         "passTests": curr.passNames.map(function(testName) {
@@ -183,10 +152,66 @@ contribs = function(head, req) {
       prev = curr;
       i++;
     }
-    results.push({
-      "team": prev.team,
-      "deliverables": deliverables
-    });
+
+    // handle the very last row we get (close the deliverable and the team)
+    deliverables[prev.deliverable] = {
+      "released": dates.release[prev.deliverable],
+      "due": dates.due[prev.deliverable],
+      "testNames": currDeliverable.allTestNames,
+      "finalGrade": +currDeliverable.finalGrade,
+      "testGrade": +currDeliverable.testGrade,
+      "coverageGrade": +currDeliverable.coverGrade,
+      "users": aggregateDeliverable(users)
+      };
+     results.push({
+        "team": prev.team,
+        "deliverables": deliverables
+      });
+
     return JSON.stringify(results);
   });
+}
+
+
+function aggregateDeliverable(users) {
+  var userKeys = Object.keys(users);
+ 	var contribTypes = ["beforeDeadline", "afterDeadline"];
+   var totalContrib = {
+     "beforeDeadline": {
+       "pass": 0,
+       "cover": 0
+     },
+     "afterDeadline": {
+       "pass": 0,
+       "cover": 0
+     }
+   }
+
+   userKeys.forEach(function(key) {
+     contribTypes.forEach(function(type) {
+       totalContrib[type].pass += users[key][type].contribution.passCount;
+       totalContrib[type].cover += users[key][type].contribution.coverage;
+     });
+   });
+
+   userKeys.forEach(function(key) {
+     contribTypes.forEach(function(type) {
+       var testPct = 0;
+       var coverPct = 0;
+       if (totalContrib[type].pass > 0)
+         testPct = users[key][type].contribution.passCount*100/totalContrib[type].pass;
+       if (totalContrib[type].cover > 0)
+         coverPct = users[key][type].contribution.coverage*100/totalContrib[type].cover;
+
+       users[key][type].contribution["tests"] = +testPct.toFixed(4);
+       users[key][type].contribution["overall"] = +(0.8*testPct + 0.2*coverPct).toFixed(4);
+
+       users[key][type].commits.forEach(function(commit) {
+         if (totalContrib[type].pass > 0)
+           commit.passPctNew = +(commit.passCountNew*100/totalContrib[type].pass).toFixed(4);
+       });
+     });
+   });
+
+   return users;
 }
