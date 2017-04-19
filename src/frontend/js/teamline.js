@@ -165,8 +165,8 @@
 				.tooltipContent(tooltip);
 
 			var d3Obj = d3.select(select.chart).datum([
-				chartData.user1.passRate, chartData.user2.passRate,
-				chartData.user1.coverage, chartData.user2.coverage
+				chartData.user1.coverage, chartData.user2.coverage,
+				chartData.user1.passRate, chartData.user2.passRate
 			]);
 
 			chart.xAxis.tickFormat(function(percentValue) {
