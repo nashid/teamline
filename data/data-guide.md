@@ -14,35 +14,39 @@ curl 'http://nicholascbradley.com:5984/results/_design/grades/_view/d1?group=tru
 ### Annotated Sample
 ```JS
 {
-  "team1": {
-    /**
-      * The percentage of AutoTest tests that were passed in the last commit
-      * before the deadline.
-      */
-    "testGrade": "96.2000",
-    /**
-      * The percentage of lines of code that were covered by tests written by
-      * the team for the last commit before the deadline.
-      */
-    "coverGrade": "93.0100",
-    /**
-      * The AutoTest grade before scaling by the restrospective/contribution
-      * mark. Composed of 80% of the percentage of tests passing and 20% of
-      * the coverage grade. The marks are taken from the last commit before
-      * the deliverable deadline.
-      */
-    "finalGrade": "95.5620",
-    /**
-      * Date of the commit in Unix epoch time (ms). Local time (GMT-8).
-      */
-    "timestamp":1486277879526
+  "d1": {
+    "team1": {
+      /**
+        * The percentage of AutoTest tests that were passed in the last commit
+        * before the deadline.
+        */
+      "testGrade": "96.2000",
+      /**
+        * The percentage of lines of code that were covered by tests written by
+        * the team for the last commit before the deadline.
+        */
+      "coverGrade": "93.0100",
+      /**
+        * The AutoTest grade before scaling by the restrospective/contribution
+        * mark. Composed of 80% of the percentage of tests passing and 20% of
+        * the coverage grade. The marks are taken from the last commit before
+        * the deliverable deadline.
+        */
+      "finalGrade": "95.5620",
+      /**
+        * Date of the commit in Unix epoch time (ms). Local time (GMT-8).
+        */
+      "timestamp":1486277879526
+    },
+    "team2": {
+      "testGrade": "67.9000",
+      "coverGrade": "81.0200",
+      "finalGrade":"70.5240",
+      "timestamp":1486396608585
+    }
   },
-  "team2": {
-    "testGrade": "67.9000",
-    "coverGrade": "81.0200",
-    "finalGrade":"70.5240",
-    "timestamp":1486396608585
-  }
+  "d2": { ... },
+  "d3": { ... }
 }
 ```
 
@@ -56,6 +60,21 @@ curl 'http://nicholascbradley.com:5984/results/_design/teamline/_list/contribs/c
   --user ${DB_USER}:${DB_PASS} \
   --output team12.json
 ```
+
+### Generate contribution JSON for all teams
+```Shell
+teams=( team10 team100 team102 team103 team107 team108 team109 team11 team111 team112 team113 team114 team115 team116 team118 team12 team121 team122 team124 team126 team127 team128 team129 team13 team130 team132 team134 team135 team136 team138 team139 team14 team142 team144 team145 team146 team147 team148 team149 team15 team150 team151 team153 team154 team155 team156 team157 team158 team16 team160 team161 team162 team167 team168 team17 team170 team172 team173 team178 team179 team18 team181 team182 team183 team185 team188 team189 team19 team190 team191 team192 team193 team194 team195 team196 team197 team198 team199 team2 team21 team22 team23 team24 team25 team26 team27 team28 team3 team31 team32 team34 team35 team36 team37 team38 team39 team4 team40 team41 team42 team43 team45 team46 team47 team48 team5 team50 team51 team53 team54 team55 team57 team58 team59 team60 team65 team66 team67 team68 team7 team72 team73 team74 team77 team78 team80 team82 team83 team84 team85 team88 team89 team9 team91 team93 team94 team96 team97 team98 )
+
+for team in "${teams[@]}"
+do
+  curl 'http://nicholascbradley.com:5984/results/_design/teamline/_list/contribs/contribs-by-team?startkey=["'${team}'"]&endkey=["'${team}'",{},{}]' \
+    --globoff \
+    --user ${DB_USER}:${DB_PASS} \
+    --output $team.json
+done
+```
+
+
 ### Annotated Sample
 ```JS
 [
@@ -170,6 +189,10 @@ curl 'http://nicholascbradley.com:5984/results/_design/teamline/_list/contribs/c
                     * i.e. Math.max(0,curr.coverGrade-currDeliverable.maxCoverage)
                     */
                   "coverageContrib":"39.5500",
+                  /**
+                    * Accumulated coverageContrib.
+                    */
+                  "coverageContribAcc":"39.5500",
                   /**
                     * Number of AutoTest tests that passed when run against this
                     * commit.

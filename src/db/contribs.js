@@ -192,6 +192,7 @@ function aggregateDeliverable(users) {
     contribTypes.forEach(function(type) {
       var testPct = 0;
       var coverPct = 0;
+      var coverageContribIncrease = 0;
       if (totalContrib[type].pass > 0)
         testPct = users[key][type].contribution.passCount*100/totalContrib[type].pass;
       if (totalContrib[type].cover > 0)
@@ -204,6 +205,10 @@ function aggregateDeliverable(users) {
       users[key][type].commits.forEach(function(commit) {
         if (totalContrib[type].pass > 0)
           commit.passPctNew = (commit.passCountNew*100/totalContrib[type].pass).toFixed(4);
+
+        if (+commit.coverageContrib > 0)
+          coverageContribIncrease += +commit.coverageContrib;
+        commit["coverageContribAcc"] = coverageContribIncrease.toFixed(4);
       });
     });
   });
