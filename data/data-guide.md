@@ -167,7 +167,12 @@ the curl commands.
                   */
                 "fCnt": 0,
                 /**
-                  * Coverage contribution accumulated from over all earlier commits.
+                  * Pass rate contribution accumulated over all earlier commits.
+                  * Only increases if a commit increased the running max.
+                  */
+                "pCtbAcc": "0.0000",
+                /**
+                  * Coverage contribution accumulated over all earlier commits.
                   */
                 "cvgCtbAcc": "68.8100"
               },
@@ -181,6 +186,7 @@ the curl commands.
                 "pPctNew": "6.8966",
                 "sCnt": 0,
                 "fCnt": 48,
+                "pCtbAcc":"6.8966",
                 "cvgCtbAcc": "71.1000"
               }
             ]
