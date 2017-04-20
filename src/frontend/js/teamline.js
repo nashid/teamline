@@ -17,10 +17,10 @@
 		views: { team: 'team', overview: 'overview' },
 		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
 		overviewColumns: 8,
-		width: 700,
-		height: 800,
+		width: 500,
+		height: 600,
 		margin: {top: 0, right: 60, bottom: 50, left: 100},
-		legendMargin: {top: 10, right: 80, left: 0, bottom: 30},
+		//legendMargin: {top: 10, right: 80, left: 0, bottom: 30},
 		marginTopToXAxis: 80, // TODO: don't know how to calculate this
 		tooltipDateFormat: 'MMMM Do YYYY, h:mm:ss a'
 	};
@@ -28,23 +28,24 @@
 	// Selectors for a few elements
 	var select = {
 		container: '#teamline',
-		chart: '#teamline-chart svg',
+		chart: '#grade-chart',
 		overview: '#teamline-overview table',
 		buttons: '#teamline-buttons',
-		backToOverview: '.back-to-overview'
+		backToOverview: '.back-to-overview',
+		teamlineCharts: '#teamline-charts'
 	};
 
 	// Some generators for field-specific chart properties
 	var props = {
 		passRate: {
-			label: function (userName) {
-				return userName + ' pass rate contribution';
+			label: function (username) {
+				return username + ' pass rate contribution';
 			},
 			color: '#ff7f0e'
 		},
 		coverage: {
-			label: function (userName) {
-				return userName + ' coverage contribution';
+			label: function (username) {
+				return username + ' coverage contribution';
 			},
 			color: '#667711'
 		}
@@ -56,23 +57,16 @@
 		buttons: Handlebars.compile($("#buttons-template").html())
 	};
 
-	// Converts the given contributionArray to a data structure required by NVD3.
-	// type refers to the field being display, i.e. either 'passRate' or 'coverage' for now.
-	function createChartData(type, userNames, userIndex, contributionArray) {
-		var userName = userNames[userIndex];
-		var values = $.map(contributionArray, function(commit) {
+	function createChartData(type, commits, username) {
+		var values = $.map(commits, function(commit) {
 			var commitClone = $.extend({}, commit);
 			return $.extend(commitClone, {
-				timestamp: commit.timestamp,
-				passCountAccumulated: commit.passCountAccumulated,
-				coverageContribAccumulated: commit.coverageContribAccumulated,
-				userIndex: userIndex,
-				userName: userName,
+				username: username,
 				type: type
 			});
 		});
 		return {
-			key: props[type].label(userName),
+			key: props[type].label(username),
 			values: values,
 			color: props[type].color
 		};
@@ -115,80 +109,100 @@
 		$('#teamline-buttons').append(renderedTemplate);
 	}
 
-	// Draws a team chart based on the current global state
-	// TODO: need to think about deliverable start date, end date and what date range to show in the chart!
-	function drawTeamChart() {
-		var data = teamData[currentState.teamName];
-		var targetDeliverable = data.deliverables[currentState.deliverableName];
-		var usersCommitData = targetDeliverable.users;
-		var userNames = Object.keys(usersCommitData).sort();
-		var user1Data = usersCommitData[userNames[0]].beforeDeadline;
-		var user2Data = usersCommitData[userNames[1]].beforeDeadline;
-		var totalPassCount = user1Data.contribution.passCount + user2Data.contribution.passCount;
-		var chartData;
+	function getChartId(username) {
+		return 'chart-'+username;
+	}
 
-		var x = function(commit) {
-			var percentValue;
-			if (commit.type === 'passRate') {
-				percentValue = commit.passCountAccumulated / totalPassCount * 100;
-			} else {
-				percentValue = commit.coverageContribAccumulated;
-			}
-			percentValue *= commit.userIndex === 0 ? -1 : 1;
-			return percentValue;
-		};
-
-		var y = function(commit) {
-			return commit.timestamp;
-		};
-
-		addAccumulatedData(user1Data.commits);
-		addAccumulatedData(user2Data.commits);
-
-		chartData = {
-			user1: {
-				passRate: createChartData('passRate', userNames, 0, user1Data.commits),
-				coverage: createChartData('coverage', userNames, 0, user1Data.commits)
-			},
-			user2: {
-				passRate: createChartData('passRate', userNames, 1, user2Data.commits),
-				coverage: createChartData('coverage', userNames, 1, user2Data.commits)
-			}
-		};
-
+	function drawChart(options) {
 		nv.addGraph(function() {
 			var chart = nv.models.lineChart()
 				.width(settings.width)
 				.height(settings.height)
 				.margin(settings.margin)
-				.x(x).y(y)
-				.tooltipContent(tooltip);
+				.tooltipContent(tooltip)
+				.x(options.x)
+				.y(options.y);
 
-			var d3Obj = d3.select(select.chart).datum([
-				chartData.user1.coverage, chartData.user2.coverage,
-				chartData.user1.passRate, chartData.user2.passRate
-			]);
+			var d3Obj = d3.select(options.selector).datum(options.data);
 
-			chart.xAxis.tickFormat(function(percentValue) {
-				percentValue *= percentValue < 0 ? -1 : 1;
+			chart.xAxis.tickFormat(function (percentValue) {
 				return d3.format('%')(percentValue / 100);
 			});
 
-			chart.yAxis.tickFormat(function(timestamp) {
+			chart.yAxis.tickFormat(function (timestamp) {
 				return d3.time.format('%a, %b %d')(new Date(timestamp))
 			});
+			chart.yAxis.tickPadding(0);
 
-			chart.forceX([-100,100]);
+			chart.forceX([0, 100]);
 			// TODO: WORK OVER THIS!
 			// 1209600000 = 2 weeks in ms; 172800000 = 1 day in ms
-			chart.forceY([targetDeliverable.due-1209600000, targetDeliverable.due+172800000]);
-			chart.legend.margin(settings.legendMargin);
+			chart.forceY(options.forceY);
+			//chart.legend.margin(settings.legendMargin);
 
 			d3Obj.style({width: settings.width, height: settings.height}).call(chart);
 
 			window.chart = chart;
 			nv.utils.windowResize(chart.update);
+		});
+	}
 
+	function drawIndividualChart(deliverable, username, totalPassCount, chartData) {
+		var $newChart = $('<svg id="'+getChartId(username)+'"></svg>');
+		$(select.teamlineCharts).append($newChart);
+		drawChart({
+			data: [chartData[username].coverage, chartData[username].passRate],
+			selector: '#' + getChartId(username),
+			x: function(commit) {
+				var percentValue;
+				if (commit.type === 'passRate') {
+					percentValue = commit.passCountAccumulated / totalPassCount * 100;
+				} else {
+					percentValue = commit.coverageContribAccumulated;
+				}
+				return percentValue;
+			},
+			y: function(commit) {
+				return commit.timestamp;
+			},
+			forceY: [deliverable.due-1209600000, deliverable.due+172800000]
+		});
+	}
+
+	function drawGradeChart(chartData) {
+		var a = 1;
+	}
+
+	// Draws a team chart based on the current global state
+	// TODO: need to think about deliverable start date, end date and what date range to show in the chart!
+	function drawTeamCharts() {
+		var data = teamData[currentState.teamName];
+		var targetDeliverable = data.deliverables[currentState.deliverableName];
+		var usersCommitData = targetDeliverable.users;
+		var usernames = Object.keys(usersCommitData).sort();
+		//var user1Data = usersCommitData[usernames[0]].beforeDeadline;
+		//var user2Data = usersCommitData[usernames[1]].beforeDeadline;
+		//var totalPassCount = user1Data.contribution.passCount + user2Data.contribution.passCount;
+		var totalPassCount = 0, individualChartData = {}, allCommits = [];
+
+		$.each(usernames, function(index, username) {
+			var userCommitData = usersCommitData[username].beforeDeadline;
+			totalPassCount += userCommitData.contribution.passCount;
+			addAccumulatedData(userCommitData.commits);
+			allCommits = allCommits.concat(userCommitData.commits);
+			individualChartData[username] = {
+				passRate: createChartData('passRate', userCommitData.commits, username),
+				coverage: createChartData('coverage', userCommitData.commits, username)
+			};
+		});
+
+		drawGradeChart({
+			passRate: createChartData('passRate', allCommits),
+			coverage: createChartData('coverage', allCommits)
+		});
+
+		$.each(usernames, function(index, username) {
+			drawIndividualChart(targetDeliverable, username, totalPassCount, individualChartData);
 		});
 	}
 
@@ -224,7 +238,7 @@
 		$(select.chart+','+select.overview).html('');
 		$(select.container).attr('data-view', currentState.view);
 		if (currentState.view === settings.views.team) {
-			drawTeamChart();
+			drawTeamCharts();
 		} else {
 			createOverview();
 		}
@@ -296,8 +310,8 @@
 	addButtons(settings.deliverables);
 
 	// Set the initial global state
-	updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-	// updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team78' }); // show team on page load
+	//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
+	updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team78' }); // show team on page load
 
 	// Load the data for the initial state and call updateView when done
 	loadData(updateView);
