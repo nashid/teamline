@@ -1,18 +1,20 @@
 (function() {
 
+	// === data ===
+	// deliverables: { d1: { due: ..., release: ... }, ... },
+	// teams: { team1: { d1: {  }, ... } }    }
+	// === deliverable ===
+	// ctbDist: "0.5783", cvgGrd: "97.2800", grd:"99.4560", pGrd: "100.0000", users: {...}
+	var globalData;
+
 	// Global state object and core of the application.
 	// Format: { deliverableName: (names in settings.deliverables), view: (names in settings.view), teamName: (name of team) }
 	// With a global state object we can easily upgrade to use the History API is we want.
 	var currentState;
 
-	// Save the data for teams with the teamName as key when fetched
-	var teamData = {};
-
-	// Store overview data
-	var overviewData;
-
 	// Configuration settings
 	var settings = {
+		teamlineDataPath: '../../data/teamline-data-mini.json',
 		deliverables: ['d1', 'd2', 'd3'],
 		views: { team: 'team', overview: 'overview' },
 		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
@@ -22,7 +24,8 @@
 		margin: {top: 0, right: 60, bottom: 50, left: 100},
 		//legendMargin: {top: 10, right: 80, left: 0, bottom: 30},
 		marginTopToXAxis: 80, // TODO: don't know how to calculate this
-		tooltipDateFormat: 'MMMM Do YYYY, h:mm:ss a'
+		tooltipDateFormat: 'MMMM Do YYYY, h:mm:ss a',
+		buttonAllLabel: 'all'
 	};
 
 	// Selectors for a few elements
@@ -183,7 +186,7 @@
 
 	function drawGradeChart(deliverable, chartData) {
 		drawChart({
-			data: [/*chartData.coverage, chartData.passRate,*/ chartData.grade],
+			data: [chartData.coverage, chartData.passRate, chartData.grade],
 			selector: '#grade-chart',
 			x: function(commit) {
 				var options = {
@@ -224,17 +227,17 @@
 		});
 
 		allCommits.sort(function(commit1, commit2) {
-			return commit1.timestamp > commit2.timestamp;
+			return commit1.timestamp - commit2.timestamp;
 		});
 
 		drawGradeChart(targetDeliverable, {
-			grade: createChartData('grade', allCommits)//,
-			//passRate: createChartData('passRate', allCommits),
-			//coverage: createChartData('coverage', allCommits)
+			grade: createChartData('grade', allCommits),
+			passRate: createChartData('passRate', allCommits),
+			coverage: createChartData('coverage', allCommits)
 		});
 
 		$.each(usernames, function(index, username) {
-			//drawIndividualChart(targetDeliverable, username, totalPassCount, individualChartData);
+			drawIndividualChart(targetDeliverable, username, totalPassCount, individualChartData);
 		});
 	}
 
@@ -276,25 +279,6 @@
 		}
 	}
 
-	// Load data based on the current global state, save the results in our global data structures and
-	// call the callback if given
-	function loadData(callback) {
-		var path = '../../data/';
-		if (currentState.view === settings.views.overview) {
-			path += 'overview.json';
-		} else {
-			path += currentState.teamName + '.json';
-		}
-		d3.json(path, function(error, data) {
-			if (currentState.view === settings.views.team) {
-				teamData[currentState.teamName] = data;
-			} else {
-				overviewData = data;
-			}
-			callback && callback();
-		});
-	}
-
 	// Called when a deliverable button was clicked
 	function onButtonClick(e) {
 		var $button = $(this);
@@ -331,24 +315,25 @@
 	// we don't need to pass all the information all the time.
 	function updateState(stateObj) {
 		currentState = $.extend(currentState, stateObj);
+		$(window).trigger('teamline.state.updated');
 		$(select.buttons).find('button[data-deliverable="'+stateObj.deliverableName+'"]')
 			.addClass('active').siblings().removeClass('active');
 	}
 
-	// The following statements are executed on page load. We don't need a DOMReady event because our script
-	// is included at the end of <body>.
+	$.getJSON(settings.teamlineDataPath, function(data) {
+		var buttons;
+		globalData = data;
+		buttons = Object.keys(globalData.deliverables);
+		buttons.push(settings.buttonAllLabel);
+		addButtons(buttons);
+		//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
+		updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team178' }); // show team on page load
+	});
 
-	// Add the deliverable buttons
-	addButtons(settings.deliverables);
+	$(window).on('teamline.state.updated', function(e) {
+		console.log('STATE UPDATE');
+	});
 
-	// Set the initial global state
-	//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-	updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team178' }); // show team on page load
-
-	// Load the data for the initial state and call updateView when done
-	loadData(updateView);
-
-	// Attach event listeners
 	$(select.buttons).on('click', 'button', onButtonClick);
 	$(select.overview).on('click', 'td', onOverviewTdClick);
 	$(select.container).on('click', select.backToOverview, onBackToOverviewClick);
