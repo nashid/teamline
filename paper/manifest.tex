@@ -101,19 +101,9 @@
 %\shortauthortitle{Firstauthor \MakeLowercase{\textit{et al.}}: Paper Title}
 
 %% Abstract section.
-% \abstract{Duis autem vel eum iriure dolor in hendrerit in vulputate
-% velit esse molestie consequat, vel illum dolore eu feugiat nulla
-% facilisis at vero eros et accumsan et iusto odio dignissim qui blandit
-% praesent luptatum zzril delenit augue duis dolore te feugait nulla
-% facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
-% sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna
-% aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
-% suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem
-% vel eum iriure dolor in hendrerit in vulputate velit esse molestie
-% consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et
-% accumsan et iusto odio dignissim qui blandit praesent luptatum zzril
-% delenit augue duis dolore te feugait nulla facilisi.%
-% } % end of abstract
+\abstract{
+  \subfile{sections/abstract}
+} % end of abstract
 
 %% Keywords that describe your work. Will show as 'Index Terms' in journal
 %% please capitalize first letter and insert punctuation after last keyword
@@ -162,15 +152,39 @@
 %% the only exception to this rule is the \firstsection command
 %\firstsection{Introduction}
 
+
 \maketitle
 
 %% \section{Introduction} %for journal use above \firstsection{..} instead
 
 
-\section{Previous Work}
+\section{Introduction}
+  \label{sec:into}
+  \subfile{sections/introduction}
+
+\section{Related Work}
   \label{sec:prev-work}
   \subfile{sections/previous-work}
 
+\section{Data and Task Abstractions}
+  \label{sec:abstractions}
+  \subfile{sections/abstractions}
+
+\section{Implementation}
+  \label{sec:implementation}
+  \subfile{sections/implementation}
+
+\section{Results}
+  \label{sec:results}
+  \subfile{sections/results}
+
+\section{Discussion}
+  \label{sec:discussion}
+  \subfile{sections/discussion}
+
+\section{Conclusion}
+  \label{sec:conclusion}
+  \subfile{sections/conclusion}
 
 \bibliographystyle{abbrv}
 %\bibliographystyle{abbrv-doi}
