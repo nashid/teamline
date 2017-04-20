@@ -39,15 +39,29 @@
 	var props = {
 		passRate: {
 			label: function (username) {
-				return username + ' pass rate contribution';
+				if (username) {
+					return username + ' pass rate contribution';
+				} else {
+					return 'Team pass rate';
+				}
 			},
 			color: '#ff7f0e'
 		},
 		coverage: {
 			label: function (username) {
-				return username + ' coverage contribution';
+				if (username) {
+					return username + ' coverage contribution';
+				} else {
+					return 'Team coverage';
+				}
 			},
 			color: '#667711'
+		},
+		grade: {
+			label: function() {
+				return 'Team grade';
+			},
+			color: 'blue'
 		}
 	};
 
@@ -154,13 +168,11 @@
 			data: [chartData[username].coverage, chartData[username].passRate],
 			selector: '#' + getChartId(username),
 			x: function(commit) {
-				var percentValue;
 				if (commit.type === 'passRate') {
-					percentValue = commit.passCountAccumulated / totalPassCount * 100;
+					return commit.passCountAccumulated / totalPassCount * 100;
 				} else {
-					percentValue = commit.coverageContribAccumulated;
+					return commit.coverageContribAccumulated;
 				}
-				return percentValue;
 			},
 			y: function(commit) {
 				return commit.timestamp;
@@ -169,8 +181,23 @@
 		});
 	}
 
-	function drawGradeChart(chartData) {
-		var a = 1;
+	function drawGradeChart(deliverable, chartData) {
+		drawChart({
+			data: [/*chartData.coverage, chartData.passRate,*/ chartData.grade],
+			selector: '#grade-chart',
+			x: function(commit) {
+				var options = {
+					passRate: 100 * commit.passTests.length / (commit.passTests.length + commit.failTests.length + commit.skipTests.length),
+					grade: parseFloat(commit.grade),
+					coverage: parseFloat(commit.coverage)
+				};
+				return options[commit.type];
+			},
+			y: function(commit) {
+				return commit.timestamp;
+			},
+			forceY: [deliverable.due-1209600000, deliverable.due+172800000]
+		});
 	}
 
 	// Draws a team chart based on the current global state
@@ -196,13 +223,18 @@
 			};
 		});
 
-		drawGradeChart({
-			passRate: createChartData('passRate', allCommits),
-			coverage: createChartData('coverage', allCommits)
+		allCommits.sort(function(commit1, commit2) {
+			return commit1.timestamp > commit2.timestamp;
+		});
+
+		drawGradeChart(targetDeliverable, {
+			grade: createChartData('grade', allCommits)//,
+			//passRate: createChartData('passRate', allCommits),
+			//coverage: createChartData('coverage', allCommits)
 		});
 
 		$.each(usernames, function(index, username) {
-			drawIndividualChart(targetDeliverable, username, totalPassCount, individualChartData);
+			//drawIndividualChart(targetDeliverable, username, totalPassCount, individualChartData);
 		});
 	}
 
@@ -311,7 +343,7 @@
 
 	// Set the initial global state
 	//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-	updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team78' }); // show team on page load
+	updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team178' }); // show team on page load
 
 	// Load the data for the initial state and call updateView when done
 	loadData(updateView);
