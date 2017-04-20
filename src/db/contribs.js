@@ -105,6 +105,7 @@ contribs = function(head, req) {
         "cvg": curr.coverGrade,
         "cvgCtb": coverContribution.toFixed(4),
         "pCnt": curr.passCount,
+        "pPct": curr.testGrade,
         "pCntNew": passContribCount,
 				"pPctNew": 0,
         "sCnt": curr.skipCount,

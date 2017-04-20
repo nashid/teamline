@@ -3,7 +3,7 @@
 ```Shell
 curl 'http://nicholascbradley.com:5984/results/_design/teamline/_list/contribs/contribs-by-team' \
   --user ${DB_USER}:${DB_PASS} \
-  --output teamline-data.json
+  --output teamline-data-mini.json
 ```
 
 Be sure to set the environment variables `DB_USER` and `DB_PASS` before running
@@ -143,6 +143,10 @@ the curl commands.
                   */
                 "pCnt": 0,
                 /**
+                  * Percentage of tests passing in this commit.
+                  */
+                "pPct": "0.0000",
+                /**
                   * Number of tests that were passed for the first time in this
                   * deliverable.
                   */
@@ -182,6 +186,7 @@ the curl commands.
                 "cvg": "71.1000",
                 "cvgCtb": "2.2900",
                 "pCnt": 2,
+                "pPct": "4.0000",
                 "pCntNew": 2,
                 "pPctNew": "6.8966",
                 "sCnt": 0,
