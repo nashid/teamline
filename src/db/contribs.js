@@ -48,15 +48,15 @@ contribs = function(head, req) {
         var userNames = Object.keys(userObj);
         var contribs = [];
         userNames.forEach(function(user) {
-          contribs.push(+userObj[user].contribution.overall/100);
+          contribs.push(+userObj[user].ctb.overall/100);
         });
         contribDist = contributionUniformityScore(contribs);
 
         deliverables[prev.deliverable] = {
-					"finalGrade": currDeliverable.finalGrade,
-					"testGrade": currDeliverable.testGrade,
-					"coverageGrade": currDeliverable.coverGrade,
-          "contribDist": contribDist.toFixed(4),
+					"grd": currDeliverable.finalGrade,
+					"pGrd": currDeliverable.testGrade,
+					"cvgGrd": currDeliverable.coverGrade,
+          "ctbDist": contribDist.toFixed(4),
 					"users": userObj
 				};
         users = {};
@@ -73,44 +73,47 @@ contribs = function(head, req) {
         return currDeliverable.everPass.indexOf(name) < 0;
       });
       var passContribCount = newPassTests.length;
-      var coverContribution = Math.max(0,curr.coverGrade-currDeliverable.maxCoverage);
+      var coverContribution = isNaN(curr.coverGrade) ? 0 : Math.max(0,curr.coverGrade-currDeliverable.maxCoverage);
       // NOT correct - not actual grade
       // var contrib = 0.8*passContribution + 0.2*coverContribution;
 
       currDeliverable.everPass = currDeliverable.everPass.concat(newPassTests);
-      currDeliverable.maxCoverage = Math.max(curr.coverGrade,currDeliverable.maxCoverage);
+      currDeliverable.maxCoverage = isNaN(curr.coverGrade) ? currDeliverable.maxCoverage : Math.max(curr.coverGrade,currDeliverable.maxCoverage);
 
       commit = {
-        "commitSha": curr.commitSha,
-        "timestamp": curr.timestamp,
-        "grade": curr.finalGrade,
-        "coverage": curr.coverGrade,
-        "coverageContrib": coverContribution.toFixed(4),
-        "passCount": curr.passCount,
-        "passCountNew": passContribCount,
-				"passPctNew": 0,
-        "skipCount": curr.skipCount,
-        "failCount": curr.failCount,
+        "sha": curr.commitSha,
+        "time": curr.timestamp,
+        "grd": curr.finalGrade,
+        "cvg": curr.coverGrade,
+        "cvgCtb": coverContribution.toFixed(4),
+        "pCnt": curr.passCount,
+        "pCntNew": passContribCount,
+				"pPctNew": 0,
+        "sCnt": curr.skipCount,
+        "fCnt": curr.failCount,
       }
 
 
       if (!users[curr.user]) {
         users[curr.user] = {
-          "contribution":{
-            "coverage": 0,
-            "passCount": 0
+          "ctb":{
+            "cvg": 0,
+            "pCnt": 0
           },
           "commits": []
         };
       }
       if (curr.timestamp <= dates.due[curr.deliverable]) {
-        users[curr.user].contribution.passCount += passContribCount;
-        users[curr.user].contribution.coverage += coverContribution;
-        users[curr.user].commits.push(commit);
+        // skip invalid commits
+        if (!isNaN(commit.grd) && !isNaN(commit.cvg)) {
+          users[curr.user].ctb.pCnt += passContribCount;
+          users[curr.user].ctb.cvg += coverContribution;
+          users[curr.user].commits.push(commit);
 
-        currDeliverable.finalGrade = curr.finalGrade;
-        currDeliverable.testGrade = curr.testGrade;
-        currDeliverable.coverGrade = curr.coverGrade;
+          currDeliverable.finalGrade = curr.finalGrade;
+          currDeliverable.testGrade = curr.testGrade;
+          currDeliverable.coverGrade = curr.coverGrade;
+        }
       }
 
       prev = curr;
@@ -122,15 +125,15 @@ contribs = function(head, req) {
     var userNames = Object.keys(userObj);
     var contribs = [];
     userNames.forEach(function(user) {
-      contribs.push(+userObj[user].contribution.overall/100);
+      contribs.push(+userObj[user].ctb.overall/100);
     });
     contribDist = contributionUniformityScore(contribs);
 
     deliverables[prev.deliverable] = {
-      "finalGrade": currDeliverable.finalGrade,
-      "testGrade": currDeliverable.testGrade,
-      "coverageGrade": currDeliverable.coverGrade,
-      "contribDist": contribDist.toFixed(4),
+      "grd": currDeliverable.finalGrade,
+      "pGrd": currDeliverable.testGrade,
+      "cvgGrd": currDeliverable.coverGrade,
+      "ctbDist": contribDist.toFixed(4),
       "users": userObj
     };
     results[prev.team] = deliverables;
@@ -155,7 +158,7 @@ function contributionUniformityScore(contributions) {
   for (var i = 0; i < m - 1; i++) {
     contribDist += Math.abs(contributions[i] - contributions[i+1])
   }
-  return 1-contribDist;  
+  return 1-contribDist;
 }
 
 
@@ -167,8 +170,8 @@ function aggregateDeliverable(users) {
   }
 
   userKeys.forEach(function(key) {
-    totalContrib.pass += users[key].contribution.passCount;
-    totalContrib.cover += users[key].contribution.coverage;
+    totalContrib.pass += users[key].ctb.pCnt;
+    totalContrib.cover += users[key].ctb.cvg;
   });
 
   userKeys.forEach(function(key) {
@@ -176,21 +179,21 @@ function aggregateDeliverable(users) {
     var coverPct = 0;
     var coverageContribIncrease = 0;
     if (totalContrib.pass > 0)
-      testPct = users[key].contribution.passCount*100/totalContrib.pass;
+      testPct = users[key].ctb.pCnt*100/totalContrib.pass;
     if (totalContrib.cover > 0)
-      coverPct = users[key].contribution.coverage*100/totalContrib.cover;
+      coverPct = users[key].ctb.cvg*100/totalContrib.cover;
 
-    users[key].contribution.coverage = users[key].contribution.coverage.toFixed(4);
-    users[key].contribution["tests"] = testPct.toFixed(4);
-    users[key].contribution["overall"] = (0.8*testPct + 0.2*coverPct).toFixed(4);
+    users[key].ctb.cvg = users[key].ctb.cvg.toFixed(4);
+    users[key].ctb["tests"] = testPct.toFixed(4);
+    users[key].ctb["overall"] = (0.8*testPct + 0.2*coverPct).toFixed(4);
 
     users[key].commits.forEach(function(commit) {
       if (totalContrib.pass > 0)
-        commit.passPctNew = (commit.passCountNew*100/totalContrib.pass).toFixed(4);
+        commit.pPctNew = (commit.pCntNew*100/totalContrib.pass).toFixed(4);
 
-      if (+commit.coverageContrib > 0)
-        coverageContribIncrease += +commit.coverageContrib;
-      commit["coverageContribAcc"] = coverageContribIncrease.toFixed(4);
+      if (+commit.cvgCtb > 0)
+        coverageContribIncrease += +commit.cvgCtb;
+      commit["cvgCtbAcc"] = coverageContribIncrease.toFixed(4);
     });
   });
   return users;
