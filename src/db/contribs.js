@@ -16,6 +16,24 @@ contribs = function(head, req) {
     }
   }
 
+  var deliverablesObj = {
+    "d1": {
+      "release": 1484755200000,
+      "due": 1486396800000
+    },
+    "d2": {
+      "release": 1487001600000,
+      "due": 1488211200000
+    },
+    "d3": {
+      "release": 1488643200000,
+      "due": 1489417200000
+    }
+  }
+
+
+
+
   var skipTeams = ["ataraxie", "fabiantam", "team000"];
 
 
@@ -143,7 +161,7 @@ contribs = function(head, req) {
       delete results[team];
     });
 
-    return JSON.stringify(results);
+    return JSON.stringify({"deliverables": deliverablesObj, "teams": results});
   });
 }
 
