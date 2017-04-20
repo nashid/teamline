@@ -32,8 +32,6 @@
 	var select = {
 		container: '#teamline',
 		chart: '#grade-chart',
-		chartUser1: '#user-chart-1',
-		chartUser2: '#user-chart-2',
 		overview: '#teamline-overview table',
 		buttons: '#teamline-buttons',
 		backToOverview: '.back-to-overview',
@@ -208,10 +206,10 @@
 	// Draws a team chart based on the current global state
 	// TODO: need to think about deliverable start date, end date and what date range to show in the chart!
 	function drawTeamCharts() {
-		var teamData = globalData.teams[currentState.teamName];
-		var targetDeliverable = teamData[currentState.deliverableName];
-		var userData = targetDeliverable.users;
-		var usernames = Object.keys(userData).sort();
+		var data = teamData[currentState.teamName];
+		var targetDeliverable = data.deliverables[currentState.deliverableName];
+		var usersCommitData = targetDeliverable.users;
+		var usernames = Object.keys(usersCommitData).sort();
 		//var user1Data = usersCommitData[usernames[0]].beforeDeadline;
 		//var user2Data = usersCommitData[usernames[1]].beforeDeadline;
 		//var totalPassCount = user1Data.contribution.passCount + user2Data.contribution.passCount;
@@ -323,21 +321,17 @@
 	}
 
 	$.getJSON(settings.teamlineDataPath, function(data) {
-		var buttons, bodyHeight = $(document.body).outerHeight();
+		var buttons;
 		globalData = data;
 		buttons = Object.keys(globalData.deliverables);
 		buttons.push(settings.buttonAllLabel);
 		addButtons(buttons);
 		//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
 		updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team178' }); // show team on page load
-		$(select.container).height(bodyHeight).addClass('visible');
 	});
 
 	$(window).on('teamline.state.updated', function(e) {
-		$(select.container).attr('data-view', currentState.view);
-		if (currentState.view === settings.views.team) {
-			drawTeamCharts();
-		}
+		console.log('STATE UPDATE');
 	});
 
 	$(select.buttons).on('click', 'button', onButtonClick);
