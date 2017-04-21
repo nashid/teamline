@@ -82,11 +82,16 @@
 				type: type
 			});
 		});
-		return {
+		var chartData = {
 			key: props[type].label(username),
 			values: values,
 			color: props[type].color
 		};
+		if (type === 'grade') {
+			chartData.disabled = true;
+		}
+
+		return chartData;
 	}
 
 	// Generates the HTML for the tooltips upon hover using Handlebars templating
@@ -128,7 +133,6 @@
 			chart.width(width);
 			chart.height(height);
 			d3obj.style({width: width, height: height}).call(chart);
-			console.log('RESIZE');
 		};
 
 		nv.addGraph(function() {
@@ -195,13 +199,14 @@
 		var userChartData = chartData[username];
 		var defaults = {
 			containerSelector: containerSelector,
-			data: [userChartData.coverage, userChartData.passRate],
+			data: [userChartData.coverage, userChartData.passRate, userChartData.grade],
 			x: function(commit) {
-				if (commit.type === 'passRate') {
-					return parseFloat(commit.pCtbAcc);
-				} else {
-					return parseFloat(commit.cvgCtbAcc);
-				}
+				var options = {
+					passRate: parseFloat(commit.pCtbAcc),
+					grade: parseFloat(commit.grd),
+					coverage: parseFloat(commit.cvgCtbAcc)
+				};
+				return options[commit.type];
 			},
 			y: function(commit) {
 				return commit.time;
@@ -226,14 +231,19 @@
 		$.each(usernames, function(index, username) {
 			var userCommits = userData[username].commits;
 			allCommits = allCommits.concat(userCommits);
-			individualChartData[username] = {
-				passRate: createChartData('passRate', userCommits, username),
-				coverage: createChartData('coverage', userCommits, username)
-			};
 		});
 
 		allCommits.sort(function(commit1, commit2) {
 			return commit1.time - commit2.time;
+		});
+
+		$.each(usernames, function(index, username) {
+			var userCommits = userData[username].commits;
+			individualChartData[username] = {
+				grade: createChartData('grade', allCommits, username),
+				passRate: createChartData('passRate', userCommits, username),
+				coverage: createChartData('coverage', userCommits, username)
+			};
 		});
 
 
