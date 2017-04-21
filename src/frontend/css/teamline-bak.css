@@ -1,124 +1,42 @@
-/* line 7, teamline-bak.scss */
-#teamline[data-view="team"] #teamline-overview {
-  display: none;
-}
-/* line 12, teamline-bak.scss */
-#teamline[data-view="overview"] #teamline-chart {
-  display: none;
-}
+/*
+Error: Invalid CSS after "due": expected "{", was ""
+        on line 130 of /Users/felix/dev/ubc/547/teamline/src/frontend/css/teamline-bak.scss
 
-/* line 18, teamline-bak.scss */
-#teamline-legend {
-  text-align: center;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
+125:     }
+126:   }
+127: 
+128: }
+129: 
+130: due
 
-/* line 25, teamline-bak.scss */
-#teamline-buttons {
-  text-align: center;
-}
-/* line 28, teamline-bak.scss */
-#teamline-buttons button:focus {
-  outline: none;
-}
-
-/* line 34, teamline-bak.scss */
-#teamline-overview {
-  padding: 20px 50px;
-}
-/* line 36, teamline-bak.scss */
-#teamline-overview table {
-  width: 100%;
-}
-/* line 39, teamline-bak.scss */
-#teamline-overview table td {
-  padding: 10px;
-  text-align: center;
-  border: 1px solid #ccc;
-  color: #444;
-}
-/* line 44, teamline-bak.scss */
-#teamline-overview table td:hover {
-  background-color: #aaa !important;
-  color: white;
-  cursor: pointer;
-}
-
-/* line 53, teamline-bak.scss */
-#teamline-charts {
-  overflow: auto;
-}
-/* line 57, teamline-bak.scss */
-#teamline-charts svg {
-  float: left;
-}
-/* line 61, teamline-bak.scss */
-#teamline-charts svg .nv-lineChart {
-  transform: translate(80px, 0);
-}
-/* line 65, teamline-bak.scss */
-#teamline-charts svg .nv-legendWrap {
-  display: none;
-  transform: translate(17px, 0);
-}
-/* line 70, teamline-bak.scss */
-#teamline-charts svg .nvd3-svg .nv-point {
-  stroke-opacity: 1;
-  stroke-width: 5px;
-  fill-opacity: 1;
-}
-/* line 76, teamline-bak.scss */
-#teamline-charts svg .duedate-line {
-  stroke: solid;
-  stroke-dasharray: 5,5;
-}
-/* line 84, teamline-bak.scss */
-#teamline-charts svg .nv-axis.nv-y g.tick text {
-  display: none;
-}
-/* line 90, teamline-bak.scss */
-#teamline-charts svg .nv-axis.nv-y g.tick:nth-of-type(1) text {
-  display: none;
-}
-/* line 96, teamline-bak.scss */
-#teamline-charts svg .nv-axis.nv-y g.tick:nth-last-of-type(2) text {
-  font-weight: bold;
-}
-/* line 99, teamline-bak.scss */
-#teamline-charts svg .nv-axis.nv-y g.tick:nth-last-of-type(2) line {
-  stroke-width: 3px;
-  stroke: #aaa;
-  stroke-dasharray: 5,5;
-}
-/* line 110, teamline-bak.scss */
-#teamline-charts svg .nv-axis.nv-x .tick.zero line {
-  stroke-width: 3px;
-  stroke: #bbb;
-}
-/* line 118, teamline-bak.scss */
-#teamline-charts svg .nv-axis .nv-axisMaxMin text {
-  font-weight: normal;
-}
-/* line 121, teamline-bak.scss */
-#teamline-charts svg .nv-axis .nv-axisMaxMin.nv-axisMaxMin-y {
-  display: none;
-}
-
-/* line 131, teamline-bak.scss */
-.teamline-tooltip ul {
-  margin: 0;
-  padding: 5px;
-}
-/* line 135, teamline-bak.scss */
-.teamline-tooltip ul li {
-  list-style-type: none;
-}
-/* line 138, teamline-bak.scss */
-.teamline-tooltip ul li .label {
-  font-size: 100%;
-  color: black;
-  padding-right: 5px;
-  font-weight: bold;
-}
+Backtrace:
+/Users/felix/dev/ubc/547/teamline/src/frontend/css/teamline-bak.scss:130
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:1165:in `expected'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:1101:in `expected'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:1096:in `tok!'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:641:in `block'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:635:in `ruleset'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:660:in `block_child'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:653:in `block_contents'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:117:in `stylesheet'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/scss/parser.rb:42:in `parse'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/engine.rb:393:in `_to_tree'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/engine.rb:268:in `render'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/plugin/compiler.rb:492:in `update_stylesheet'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/plugin/compiler.rb:215:in `block in update_stylesheets'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/plugin/compiler.rb:209:in `each'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/plugin/compiler.rb:209:in `update_stylesheets'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/plugin/compiler.rb:470:in `on_file_changed'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/lib/sass/plugin/compiler.rb:328:in `block in watch'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/vendor/listen/lib/listen/listener.rb:252:in `call'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/vendor/listen/lib/listen/listener.rb:252:in `on_change'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/vendor/listen/lib/listen/listener.rb:290:in `block in initialize_adapter'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/vendor/listen/lib/listen/adapter.rb:254:in `call'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/vendor/listen/lib/listen/adapter.rb:254:in `report_changes'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/vendor/listen/lib/listen/adapter.rb:323:in `poll_changed_directories'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.13/vendor/listen/lib/listen/adapter.rb:299:in `block in start_poller'
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Error: Invalid CSS after \"due\": expected \"{\", was \"\"\A         on line 130 of /Users/felix/dev/ubc/547/teamline/src/frontend/css/teamline-bak.scss\A \A 125:     }\A 126:   }\A 127: \A 128: }\A 129: \A 130: due"; }

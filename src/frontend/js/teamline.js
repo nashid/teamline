@@ -19,9 +19,7 @@
 		views: { team: 'team', overview: 'overview' },
 		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
 		overviewColumns: 8,
-		width: 500,
-		height: 600,
-		margin: {top: 0, right: 60, bottom: 50, left: 100},
+		margin: {top: 20, right: 50, bottom: 0, left: 50},
 		//legendMargin: {top: 10, right: 80, left: 0, bottom: 30},
 		marginTopToXAxis: 80, // TODO: don't know how to calculate this
 		tooltipDateFormat: 'MMMM Do YYYY, h:mm:ss a',
@@ -91,29 +89,16 @@
 		};
 	}
 
-	// Adds the accumulated fields that aren't available on the data
-	function addAccumulatedData(commitsArray) {
-		var passCountAccumulated = 0, coverageContribAccumulated = 0;
-		$.each(commitsArray, function(index, commit) {
-			passCountAccumulated += commit.passCountNew;
-			coverageContribAccumulated += commit.coverageContrib;
-			$.extend(commit, {
-				passCountAccumulated: passCountAccumulated,
-				coverageContribAccumulated: coverageContribAccumulated
-			});
-		});
-	}
-
 	// Generates the HTML for the tooltips upon hover using Handlebars templating
 	function tooltip(object) {
 		var point = object.point;
 		var items = [
-			{ label: 'Time', value: moment(point.timestamp).format(settings.tooltipDateFormat) },
-			{ label: 'Grade', value: point.grade },
-			{ label: 'Passed Tests', value: point.passCount },
-			{ label: 'Failed Tests', value: point.failCount },
-			{ label: 'Skipped Tests', value: point.skipCount },
-			{ label: 'Coverage', value: point.coverage }
+			{ label: 'Time', value: moment(point.time).format(settings.tooltipDateFormat) },
+			{ label: 'Grade', value: point.grd },
+			{ label: 'Passed Tests', value: point.pCnt },
+			{ label: 'Failed Tests', value: point.fCnt },
+			{ label: 'Skipped Tests', value: point.sCnt },
+			{ label: 'Coverage', value: point.cvg }
 		];
 		return templates.tooltip({ items: items });
 	}
@@ -133,76 +118,98 @@
 	}
 
 	function drawChart(options) {
+		var $container = $(options.containerSelector);
+		var chartSelector = options.containerSelector + ' svg';
+		var $chart = $(chartSelector);
+		var deliverable = globalData.deliverables[currentState.deliverableName];
+		var updateSize = function(d3obj, chart) {
+			var width = $container.width();
+			var height = $container.height();
+			chart.width(width);
+			chart.height(height);
+			d3obj.style({width: width, height: height}).call(chart);
+			console.log('RESIZE');
+		};
+
 		nv.addGraph(function() {
 			var chart = nv.models.lineChart()
-				.width(settings.width)
-				.height(settings.height)
-				.margin(settings.margin)
-				.tooltipContent(tooltip)
+				.margin(options.margin || {top: 0, right: 0, bottom: 0, left: 5})
+				.tooltipContent(options.tooltip || tooltip)
 				.x(options.x)
-				.y(options.y);
+				.y(options.y)
+				.showLegend(false)
+				.showYAxis(options.showYAxis !== false)
+				.showXAxis(options.showXAxis !== false);
 
-			var d3Obj = d3.select(options.selector).datum(options.data);
+			var d3obj = d3.select(chartSelector).datum(options.data);
 
-			chart.xAxis.tickFormat(function (percentValue) {
+			chart.xAxis.tickFormat(function(percentValue) {
 				return d3.format('%')(percentValue / 100);
 			});
+			chart.xAxis.tickPadding(options.xTickPadding || 0);
 
-			chart.yAxis.tickFormat(function (timestamp) {
-				return d3.time.format('%a, %b %d')(new Date(timestamp))
+			chart.yAxis.tickFormat(function(timestamp) {
+				return d3.time.format('%b %d')(new Date(timestamp))
 			});
-			chart.yAxis.tickPadding(0);
+			chart.yAxis.tickPadding(options.yTickPadding || 0);
+			chart.forceX(options.forceX);
 
-			chart.forceX([0, 100]);
+			chart.forceX([0, 108]);
 			// TODO: WORK OVER THIS!
 			// 1209600000 = 2 weeks in ms; 172800000 = 1 day in ms
-			chart.forceY(options.forceY);
+			chart.forceY([deliverable.release-172800000, deliverable.due+172800000]);
 			//chart.legend.margin(settings.legendMargin);
 
-			d3Obj.style({width: settings.width, height: settings.height}).call(chart);
+			$chart.data({d3obj: d3obj, nvd3obj: chart});
 
-			window.chart = chart;
-			nv.utils.windowResize(chart.update);
+			updateSize(d3obj, chart);
+
+			nv.utils.windowResize(function() {
+				updateSize(d3obj, chart);
+			});
 		});
 	}
 
-	function drawIndividualChart(deliverable, username, totalPassCount, chartData) {
-		var $newChart = $('<svg id="'+getChartId(username)+'"></svg>');
-		$(select.teamlineCharts).append($newChart);
+	function drawGradeChart(containerSelector, chartData) {
 		drawChart({
-			data: [chartData[username].coverage, chartData[username].passRate],
-			selector: '#' + getChartId(username),
-			x: function(commit) {
-				if (commit.type === 'passRate') {
-					return commit.passCountAccumulated / totalPassCount * 100;
-				} else {
-					return commit.coverageContribAccumulated;
-				}
-			},
-			y: function(commit) {
-				return commit.timestamp;
-			},
-			forceY: [deliverable.due-1209600000, deliverable.due+172800000]
-		});
-	}
-
-	function drawGradeChart(deliverable, chartData) {
-		drawChart({
+			containerSelector: containerSelector,
+			margin: {top: 0, right: 0, bottom: 0, left: 50},
 			data: [chartData.coverage, chartData.passRate, chartData.grade],
-			selector: '#grade-chart',
 			x: function(commit) {
 				var options = {
-					passRate: 100 * commit.passTests.length / (commit.passTests.length + commit.failTests.length + commit.skipTests.length),
-					grade: parseFloat(commit.grade),
-					coverage: parseFloat(commit.coverage)
+					passRate: parseFloat(commit.pPct),
+					grade: parseFloat(commit.grd),
+					coverage: parseFloat(commit.cvg)
 				};
 				return options[commit.type];
 			},
 			y: function(commit) {
-				return commit.timestamp;
+				return commit.time;
 			},
-			forceY: [deliverable.due-1209600000, deliverable.due+172800000]
+			xTickPadding: -15,
+			yTickPadding: 5
 		});
+	}
+
+	function drawIndividualChart(containerSelector, username, chartData, options) {
+		var userChartData = chartData[username];
+		var defaults = {
+			containerSelector: containerSelector,
+			data: [userChartData.coverage, userChartData.passRate],
+			x: function(commit) {
+				if (commit.type === 'passRate') {
+					return parseFloat(commit.pCtbAcc);
+				} else {
+					return parseFloat(commit.cvgCtbAcc);
+				}
+			},
+			y: function(commit) {
+				return commit.time;
+			},
+			xTickPadding: -15,
+			yTickPadding: 5
+		};
+		drawChart($.extend(defaults, options));
 	}
 
 	// Draws a team chart based on the current global state
@@ -214,32 +221,56 @@
 		var usernames = Object.keys(userData).sort();
 		//var user1Data = usersCommitData[usernames[0]].beforeDeadline;
 		//var user2Data = usersCommitData[usernames[1]].beforeDeadline;
-		//var totalPassCount = user1Data.contribution.passCount + user2Data.contribution.passCount;
-		var totalPassCount = 0, individualChartData = {}, allCommits = [];
+		var individualChartData = {}, allCommits = [];
 
 		$.each(usernames, function(index, username) {
-			var userCommitData = usersCommitData[username].beforeDeadline;
-			totalPassCount += userCommitData.contribution.passCount;
-			addAccumulatedData(userCommitData.commits);
-			allCommits = allCommits.concat(userCommitData.commits);
+			var userCommits = userData[username].commits;
+			allCommits = allCommits.concat(userCommits);
 			individualChartData[username] = {
-				passRate: createChartData('passRate', userCommitData.commits, username),
-				coverage: createChartData('coverage', userCommitData.commits, username)
+				passRate: createChartData('passRate', userCommits, username),
+				coverage: createChartData('coverage', userCommits, username)
 			};
 		});
 
 		allCommits.sort(function(commit1, commit2) {
-			return commit1.timestamp - commit2.timestamp;
+			return commit1.time - commit2.time;
 		});
 
-		drawGradeChart(targetDeliverable, {
+
+		drawGradeChart('#grade-chart-container', {
 			grade: createChartData('grade', allCommits),
 			passRate: createChartData('passRate', allCommits),
 			coverage: createChartData('coverage', allCommits)
 		});
 
+		drawIndividualChart('#user-chart-1-container', usernames[0], individualChartData);
+		drawIndividualChart('#user-chart-2-container', usernames[1], individualChartData);
+
+
+		// drawGradeChart('#user-chart-1-container', {
+		// 	grade: createChartData('grade', allCommits),
+		// 	passRate: createChartData('passRate', allCommits),
+		// 	coverage: createChartData('coverage', allCommits)
+		// });
+		//
+		// drawGradeChart('#user-chart-2-container', {
+		// 	grade: createChartData('grade', allCommits),
+		// 	passRate: createChartData('passRate', allCommits),
+		// 	coverage: createChartData('coverage', allCommits)
+		// });
+
+
 		$.each(usernames, function(index, username) {
-			drawIndividualChart(targetDeliverable, username, totalPassCount, individualChartData);
+			var containerSelector = '.gallery-chart-container[data-username="'+username+'"]';
+			var $chartContainer = $('<div class="gallery-chart-container" data-username="'+username+'">');
+			var $svg = $('<svg class="gallery-chart"></svg>');
+			$chartContainer.append($svg);
+			$('#teamline-gallery').append($chartContainer);
+			drawIndividualChart(containerSelector, username, individualChartData, {
+				showYAxis: false,
+				showXAxis: false,
+				tooltip: $.noop
+			});
 		});
 	}
 
@@ -286,7 +317,6 @@
 		var $button = $(this);
 		if (!$button.hasClass('active')) {
 			updateState({ deliverableName: $(this).data('deliverable') });
-			updateView();
 		}
 	}
 
@@ -306,11 +336,6 @@
 	function onBackToOverviewClick(e) {
 		e.preventDefault();
 		updateState({ view: 'overview' });
-		if (!overviewData) {
-			loadData(updateView);
-		} else {
-			updateView();
-		}
 	}
 
 	// Central function for changing the global state. The state is extended by the given object, which means
@@ -318,8 +343,6 @@
 	function updateState(stateObj) {
 		currentState = $.extend(currentState, stateObj);
 		$(window).trigger('teamline.state.updated');
-		$(select.buttons).find('button[data-deliverable="'+stateObj.deliverableName+'"]')
-			.addClass('active').siblings().removeClass('active');
 	}
 
 	$.getJSON(settings.teamlineDataPath, function(data) {
@@ -327,14 +350,17 @@
 		globalData = data;
 		buttons = Object.keys(globalData.deliverables);
 		buttons.push(settings.buttonAllLabel);
+		$(select.container).height(bodyHeight).addClass('visible');
 		addButtons(buttons);
 		//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-		updateState({ deliverableName: 'd1', view: settings.views.team, teamName: 'team178' }); // show team on page load
-		$(select.container).height(bodyHeight).addClass('visible');
+		updateState({ deliverableName: 'd2', view: settings.views.team, teamName: 'team178' }); // show team on page load
 	});
 
 	$(window).on('teamline.state.updated', function(e) {
+		$('#teamline-gallery, svg').html('');
 		$(select.container).attr('data-view', currentState.view);
+		$(select.buttons).find('button[data-deliverable="'+currentState.deliverableName+'"]')
+			.addClass('active').siblings().removeClass('active');
 		if (currentState.view === settings.views.team) {
 			drawTeamCharts();
 		}
