@@ -115,25 +115,34 @@
 #teamline-gallery .gallery-chart-container {
   float: left;
   width: 170px;
-  border: 3px solid #aaa;
+  border: 3px solid #ccc;
   margin-right: 10px;
   background: white;
+  background-image: url("../images/unchecked.png");
+  background-size: 20px 20px;
+  background-position: 98% 2%;
+  background-repeat: no-repeat;
 }
-/* line 141, teamline.scss */
+/* line 143, teamline.scss */
+#teamline-gallery .gallery-chart-container.active {
+  background-image: url("../images/checked.png");
+  border-color: #62b1f6;
+}
+/* line 150, teamline.scss */
 #teamline-gallery svg .nv-point-paths {
   display: none;
 }
 
-/* line 148, teamline.scss */
+/* line 157, teamline.scss */
 .teamline-tooltip ul {
   margin: 0;
   padding: 5px;
 }
-/* line 152, teamline.scss */
+/* line 161, teamline.scss */
 .teamline-tooltip ul li {
   list-style-type: none;
 }
-/* line 155, teamline.scss */
+/* line 164, teamline.scss */
 .teamline-tooltip ul li .label {
   font-size: 100%;
   color: black;

@@ -34,7 +34,6 @@
 		chartUser2: '#user-chart-2',
 		overview: '#teamline-overview table',
 		buttons: '#teamline-buttons',
-		backToOverview: '.back-to-overview',
 		teamlineCharts: '#teamline-charts'
 	};
 
@@ -64,7 +63,7 @@
 			label: function() {
 				return 'Team grade';
 			},
-			color: 'blue'
+			color: '#A35BFF'
 		}
 	};
 
@@ -74,19 +73,21 @@
 		buttons: Handlebars.compile($("#buttons-template").html())
 	};
 
-	function createChartData(type, commits, username) {
-		var values = $.map(commits, function(commit) {
+	function createChartData(type, commits, options) {
+		var values;
+		options = $.extend({}, options);
+		values = $.map(commits, function(commit) {
 			var commitClone = $.extend({}, commit);
 			return $.extend(commitClone, {
-				username: username,
+				username: options.username || null,
 				type: type
 			});
 		});
 		return {
-			key: props[type].label(username),
+			key: props[type].label(options.username || null),
 			values: values,
 			color: props[type].color,
-			disabled: username && type === 'grade'
+			disabled: options.disabled === true
 		};
 	}
 
@@ -157,7 +158,7 @@
 			chart.forceX([0, 110]);
 			// TODO: WORK OVER THIS!
 			// 1209600000 = 2 weeks in ms; 172800000 = 1 day in ms
-			chart.forceY([deliverable.release-172800000, deliverable.due+172800000]);
+			chart.forceY([deliverable.release-57600000, deliverable.due+57600000]);
 			//chart.legend.margin(settings.legendMargin);
 
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
@@ -170,11 +171,11 @@
 		});
 	}
 
-	function drawGradeChart(containerSelector, chartData) {
+	function drawGradeChart(context) {
 		drawChart({
-			containerSelector: containerSelector,
+			containerSelector: '#grade-chart-container',
 			margin: {top: 0, right: 0, bottom: 0, left: 50},
-			data: [chartData.coverage, chartData.passRate, chartData.grade],
+			data: [context.gradeChartData.coverage, context.gradeChartData.passRate, context.gradeChartData.grade],
 			x: function(commit) {
 				var options = {
 					passRate: parseFloat(commit.pPct),
@@ -192,10 +193,9 @@
 	}
 
 	function drawIndividualChart(containerSelector, username, chartData, options) {
-		var userChartData = chartData[username];
 		var defaults = {
 			containerSelector: containerSelector,
-			data: [userChartData.coverage, userChartData.passRate, userChartData.grade],
+			data: [chartData.coverage, chartData.passRate, chartData.grade],
 			x: function(commit) {
 				var options = {
 					passRate: parseFloat(commit.pCtbAcc),
@@ -213,16 +213,24 @@
 		drawChart($.extend(defaults, options));
 	}
 
-	// Draws a team chart based on the current global state
-	// TODO: need to think about deliverable start date, end date and what date range to show in the chart!
-	function drawTeamCharts() {
+	function appendGalleryChartContainer(username, hasFocus) {
+		var containerSelector = '.gallery-chart-container[data-username="'+username+'"]';
+		var $chartContainer = $('<div class="gallery-chart-container" data-username="'+username+'">');
+		var $svg = $('<svg class="gallery-chart"></svg>');
+		if (hasFocus) {
+			$chartContainer.addClass('active');
+		}
+		$chartContainer.append($svg);
+		$('#teamline-gallery').append($chartContainer);
+		return containerSelector;
+	}
+
+	function createChartContext() {
 		var teamData = globalData.teams[currentState.teamName];
 		var targetDeliverable = teamData[currentState.deliverableName];
 		var userData = targetDeliverable.users;
 		var usernames = Object.keys(userData).sort();
-		//var user1Data = usersCommitData[usernames[0]].beforeDeadline;
-		//var user2Data = usersCommitData[usernames[1]].beforeDeadline;
-		var individualChartData = {}, allCommits = [];
+		var allCommits = [], gradeChartData, disabledGradeData, emptyChartData;
 
 		$.each(usernames, function(index, username) {
 			var userCommits = userData[username].commits;
@@ -233,51 +241,75 @@
 			return commit1.time - commit2.time;
 		});
 
-		$.each(usernames, function(index, username) {
-			var userCommits = userData[username].commits;
-			individualChartData[username] = {
-				grade: createChartData('grade', allCommits, username),
-				passRate: createChartData('passRate', userCommits, username),
-				coverage: createChartData('coverage', userCommits, username)
-			};
-		});
-
-
-		drawGradeChart('#grade-chart-container', {
+		gradeChartData = {
 			grade: createChartData('grade', allCommits),
 			passRate: createChartData('passRate', allCommits),
 			coverage: createChartData('coverage', allCommits)
+		};
+
+		disabledGradeData = $.extend({}, gradeChartData.grade);
+		disabledGradeData.disabled = true;
+
+		emptyChartData = {
+			grade: disabledGradeData,
+			passRate: createChartData('passRate', []),
+			coverage: createChartData('coverage', [])
+		};
+
+		return {
+			userData: userData,
+			usernames: usernames,
+			gradeChartData: gradeChartData,
+			disabledGradeData: disabledGradeData,
+			emptyChartData: emptyChartData
+		};
+	}
+
+	function drawUserCharts(context) {
+		$.each([0,1], function(index) {
+			var userIndex = currentState.users[index];
+			var containerSelector = '#user-chart-'+(index+1)+'-container';
+			var username, userCommits;
+			if (userIndex === undefined) {
+				drawIndividualChart(containerSelector, '', context.emptyChartData);
+			} else {
+				username = context.usernames[userIndex];
+				userCommits = context.userData[username].commits;
+				drawIndividualChart(containerSelector, username, {
+					grade: context.disabledGradeData,
+					passRate: createChartData('passRate', userCommits, { username: username }),
+					coverage: createChartData('coverage', userCommits, { username: username })
+				});
+			}
 		});
+	}
 
-		drawIndividualChart('#user-chart-1-container', usernames[0], individualChartData);
-		drawIndividualChart('#user-chart-2-container', usernames[1], individualChartData);
-
-
-		// drawGradeChart('#user-chart-1-container', {
-		// 	grade: createChartData('grade', allCommits),
-		// 	passRate: createChartData('passRate', allCommits),
-		// 	coverage: createChartData('coverage', allCommits)
-		// });
-		//
-		// drawGradeChart('#user-chart-2-container', {
-		// 	grade: createChartData('grade', allCommits),
-		// 	passRate: createChartData('passRate', allCommits),
-		// 	coverage: createChartData('coverage', allCommits)
-		// });
-
-
-		$.each(usernames, function(index, username) {
-			var containerSelector = '.gallery-chart-container[data-username="'+username+'"]';
-			var $chartContainer = $('<div class="gallery-chart-container" data-username="'+username+'">');
-			var $svg = $('<svg class="gallery-chart"></svg>');
-			$chartContainer.append($svg);
-			$('#teamline-gallery').append($chartContainer);
-			drawIndividualChart(containerSelector, username, individualChartData, {
+	function drawGalleryCharts(context) {
+		$.each(context.usernames, function(index, username) {
+			var userCommits = context.userData[username].commits;
+			var userChartIndex = currentState.users.indexOf(index);
+			var hasFocus = userChartIndex === 0 || userChartIndex === 1;
+			var galleryContainerSelector = appendGalleryChartContainer(username, hasFocus);
+			var chartData = {
+				grade: context.disabledGradeData,
+				passRate: createChartData('passRate', userCommits, { username: username }),
+				coverage: createChartData('coverage', userCommits, { username: username })
+			};
+			drawIndividualChart(galleryContainerSelector, username, chartData, {
 				showYAxis: false,
 				showXAxis: false,
 				tooltip: $.noop
 			});
 		});
+	}
+
+	// Draws a team chart based on the current global state
+	// TODO: need to think about deliverable start date, end date and what date range to show in the chart!
+	function drawTeamCharts() {
+		var context = createChartContext();
+		drawGradeChart(context);
+		drawGalleryCharts(context);
+		drawUserCharts(context);
 	}
 
 	// Creates the overview table
@@ -322,15 +354,16 @@
 	function onButtonClick(e) {
 		var $button = $(this);
 		if (!$button.hasClass('active')) {
-			updateState({ deliverableName: $(this).data('deliverable') });
+			updateState('button', { deliverableName: $(this).data('deliverable') });
 		}
+		$button.addClass('active').siblings().removeClass('active');
 	}
 
 	// Called when a cell in the overview was clicked
 	function onOverviewTdClick(e) {
 		var $td = $(this);
 		var teamName = $td.attr('data-teamname');
-		updateState({ view: settings.views.team, teamName: teamName });
+		updateState('overviewcell', { view: settings.views.team, teamName: teamName });
 		if (!teamData[teamName]) {
 			loadData(updateView);
 		} else {
@@ -338,17 +371,34 @@
 		}
 	}
 
-	// Called when the "back to overview" link was clicked
-	function onBackToOverviewClick(e) {
-		e.preventDefault();
-		updateState({ view: 'overview' });
-	}
-
 	// Central function for changing the global state. The state is extended by the given object, which means
 	// we don't need to pass all the information all the time.
-	function updateState(stateObj) {
+	function updateState(trigger, stateObj) {
 		currentState = $.extend(currentState, stateObj);
+		currentState.lastTrigger = trigger;
 		$(window).trigger('teamline.state.updated');
+	}
+
+	function onGalleryItemClick(e) {
+		var activeIndexes = [];
+		var $target = $(this);
+		var changeState = true;
+		if (!$target.hasClass('active')) {
+			if ($('.gallery-chart-container.active').length < 2) {
+				$target.addClass('active');
+			} else {
+				changeState = false;
+			}
+		} else {
+			$target.removeClass('active');
+		}
+
+		if (changeState) {
+			$('.gallery-chart-container.active').each(function() {
+				activeIndexes.push($(this).index());
+			});
+			updateState('gallery', {users: activeIndexes});
+		}
 	}
 
 	$.getJSON(settings.teamlineDataPath, function(data) {
@@ -359,21 +409,24 @@
 		$(select.container).height(bodyHeight).addClass('visible');
 		addButtons(buttons);
 		//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-		updateState({ deliverableName: 'd2', view: settings.views.team, teamName: 'team78' }); // show team on page load
+		updateState('init', { deliverableName: 'd2', view: settings.views.team, teamName: 'team19', users: [0,1] });
 	});
 
 	$(window).on('teamline.state.updated', function(e) {
-		$('#teamline-gallery, svg').html('');
 		$(select.container).attr('data-view', currentState.view);
-		$(select.buttons).find('button[data-deliverable="'+currentState.deliverableName+'"]')
-			.addClass('active').siblings().removeClass('active');
 		if (currentState.view === settings.views.team) {
-			drawTeamCharts();
+			if (currentState.lastTrigger === 'gallery') {
+				$('.user-chart').html('');
+				drawUserCharts(createChartContext());
+			} else {
+				$('#teamline-gallery, svg').html('');
+				drawTeamCharts();
+			}
 		}
 	});
 
 	$(select.buttons).on('click', 'button', onButtonClick);
 	$(select.overview).on('click', 'td', onOverviewTdClick);
-	$(select.container).on('click', select.backToOverview, onBackToOverviewClick);
+	$(select.container).on('click', '.gallery-chart-container', onGalleryItemClick);
 
 }());
