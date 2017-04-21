@@ -82,16 +82,12 @@
 				type: type
 			});
 		});
-		var chartData = {
+		return {
 			key: props[type].label(username),
 			values: values,
-			color: props[type].color
+			color: props[type].color,
+			disabled: username && type === 'grade'
 		};
-		if (username && type === 'grade') {
-			chartData.disabled = true;
-		}
-
-		return chartData;
 	}
 
 	// Generates the HTML for the tooltips upon hover using Handlebars templating
@@ -363,7 +359,7 @@
 		$(select.container).height(bodyHeight).addClass('visible');
 		addButtons(buttons);
 		//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-		updateState({ deliverableName: 'd2', view: settings.views.team, teamName: 'team178' }); // show team on page load
+		updateState({ deliverableName: 'd2', view: settings.views.team, teamName: 'team78' }); // show team on page load
 	});
 
 	$(window).on('teamline.state.updated', function(e) {
