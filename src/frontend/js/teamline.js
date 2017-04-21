@@ -154,7 +154,7 @@
 			chart.yAxis.tickPadding(options.yTickPadding || 0);
 			chart.forceX(options.forceX);
 
-			chart.forceX([0, 108]);
+			chart.forceX([0, 110]);
 			// TODO: WORK OVER THIS!
 			// 1209600000 = 2 weeks in ms; 172800000 = 1 day in ms
 			chart.forceY([deliverable.release-172800000, deliverable.due+172800000]);
