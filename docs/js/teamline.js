@@ -425,6 +425,10 @@
 		}
 	});
 
+	window.setTeam = function(teamName) {
+		updateState('teamchange', { teamName: teamName });
+	};
+
 	$(select.buttons).on('click', 'button', onButtonClick);
 	$(select.overview).on('click', 'td', onOverviewTdClick);
 	$(select.container).on('click', '.gallery-chart-container', onGalleryItemClick);
