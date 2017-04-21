@@ -2,8 +2,59 @@
     <head>
         <meta charset="utf-8">
         <title>Teamline</title>
+        <link rel="stylesheet" href="css/lib/bootstrap.min.css">
+        <link rel="stylesheet" href="css/lib/nv.d3.css">
+        <link rel="stylesheet" href="css/teamline.css">
+        <script src="js/lib/handlebars.js"></script>
+        <script src="js/lib/moment.js"></script>
+        <script src="js/lib/d3.v3.min.js"></script>
+        <script src="js/lib/nv.d3.min.js"></script>
+        <script src="js/lib/jquery-3.2.0.min.js"></script>
     </head>
     <body>
-        <h1>HALLO</h1>
+
+        <div id="teamline">
+            <div id="teamline-menu">
+                <div id="teamline-buttons"></div>
+            </div>
+            <div id="teamline-stage">
+                <div id="teamline-overview"><table></table></div>
+                <div id="teamline-charts">
+                    <div id="grade-chart-container">
+                        <svg></svg>
+                    </div>
+                    <div id="user-chart-1-container">
+                        <svg class="user-chart"></svg>
+                    </div>
+                    <div id="user-chart-2-container">
+                        <svg class="user-chart"></svg>
+                    </div>
+                </div>
+                <div id="teamline-gallery">
+
+                </div>
+            </div>
+
+        </div>
+
+        <script id="tooltip-template" type="text/x-handlebars-template">
+            <div class="teamline-tooltip">
+                <ul>
+                    {{#each items}}
+                    <li><span class="label">{{this.label}}:</span><span class="content">{{this.value}}</span></li>
+                    {{/each}}
+                </ul>
+            </div>
+        </script>
+
+        <script id="buttons-template" type="text/x-handlebars-template">
+            <div class="btn-group" role="group">
+                {{#each buttons}}
+                <button data-deliverable="{{this.deliverable}}" type="button" class="btn btn-default {{classes}}">{{this.label}}</button>
+                {{/each}}
+            </div>
+        </script>
+
+        <script src="js/teamline.js"></script>
     </body>
 </html>
