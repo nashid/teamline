@@ -182,6 +182,7 @@ function contributionUniformityScore(contributions) {
 
 
 function aggregateDeliverable(users) {
+  var maxCoverage = 0;
   var userKeys = Object.keys(users);
   var totalContrib = {
     "pass": 0,
@@ -191,6 +192,11 @@ function aggregateDeliverable(users) {
   userKeys.forEach(function(key) {
     totalContrib.pass += users[key].ctb.pCnt;
     totalContrib.cover += users[key].ctb.cvg;
+
+    users[key].commits.forEach(function(commit) {
+      if (+commit.cvg > maxCoverage)
+        maxCoverage = +commit.cvg;
+    });
   });
 
   userKeys.forEach(function(key) {
@@ -203,7 +209,7 @@ function aggregateDeliverable(users) {
     if (totalContrib.cover > 0)
       coverPct = users[key].ctb.cvg*100/totalContrib.cover;
 
-    users[key].ctb.cvg = users[key].ctb.cvg.toFixed(4);
+    users[key].ctb.cvg = (users[key].ctb.cvg*100/maxCoverage).toFixed(4);
     users[key].ctb["tests"] = testPct.toFixed(4);
     users[key].ctb["overall"] = (0.8*testPct + 0.2*coverPct).toFixed(4);
 
@@ -216,7 +222,7 @@ function aggregateDeliverable(users) {
 
       if (+commit.cvgCtb > 0)
         coverageContribIncrease += +commit.cvgCtb;
-      commit["cvgCtbAcc"] = coverageContribIncrease.toFixed(4);
+      commit["cvgCtbAcc"] = (coverageContribIncrease*100/maxCoverage).toFixed(4);
 
 
     });
