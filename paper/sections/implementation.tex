@@ -2,4 +2,27 @@
 
 \begin{document}
 Implementation
+
+The work was divided as: ...
+We used the libraries: ...
+
+\subsection{Data Transformation}
+Teamline uses data captured in a CouchDB noSQL database during the 2016 winter 2 term for the CPSC310 course project. We made a copy of this database after the project was complete and deployed the copy on a personal server. The database is over 14 GB and contains approximately 45,000 commit records which contain details about the committed code including the pass rate against the instructor written tests and the percentage of code the team covered with their own tests. The fields relevant to Teamline are specified in table ***. These fields are extracted from the database using a map-reduce view whose code is available in \texttt{contribs-by-team.js}. The view emits a list of commits which can be optionally filtered by team, deliverable and timestamp. On top of this view, we implemented a list function whose code is available in \texttt{contrib.js} that takes as input the filtered list of commits and outputs a list of team objects: aggregates of all the commits made by the members of the team. A complete description of the fields emitted by the list function can be found in \texttt{data-guide.md}. The most challenging part of transforming the data was to define a metrics for contribution.
+
+\textbf{Test grade contribution.} A student's commit is considered as contributing to the team's test pass percentage if one or more tests are passed for the first time with this commit. The contribution calculated as the number of passing for the first time divided by the total number of tests passed by the team. We do not visualize this value value directly. Instead, we visualize the accumulated value over all commits to ensure that the plotted points are monotonic.
+
+\textbf{Coverage grade contribution.} We consider a contribution to the coverage grade to occur when a commit increases the coverage grade beyond anything seen so far. The amount of the  contribution is the amount by which which it exceeds the running maximum. Again, we accumulate this value to ensure a monotonic line. Note that the coverage is increased when a student writes (more) tests that execute a higher proportion of their code or they change the total lines of code.
+
+\textbf{Within team contribution disparity.} We had to create a single value to represent how uniformly the work was divided among the team members so that we could use a heat map for the overview page. We accomplish this by taking the sorted pairwise difference of the overall contribution (computed as 80\% test grade contribution and 20\% coverage grade contribution) of each team member. More specifically, if $m$ is the number of team members and $u_i$ is the overall contribution for the $i$th team member (sorted by overall contribution), then we have
+
+\begin{equation}
+  \label{eq:disparity}
+  disparity = \sum_{i=1}^{m-1} |u_i - u_{i+1}|.
+\end{equation}
+
+
+
+\subsection{Overview View}
+\subsection{Detail View}
+
 \end{document}
