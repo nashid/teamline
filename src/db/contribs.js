@@ -196,7 +196,7 @@ function aggregateDeliverable(users) {
   userKeys.forEach(function(key) {
     var testPct = 0;
     var coverPct = 0;
-    var passContribMax = 0;
+    var passContribIncrease = 0;
     var coverageContribIncrease = 0;
     if (totalContrib.pass > 0)
       testPct = users[key].ctb.pCnt*100/totalContrib.pass;
@@ -210,9 +210,9 @@ function aggregateDeliverable(users) {
     users[key].commits.forEach(function(commit) {
       if (totalContrib.pass > 0)
         commit.pPctNew = (commit.pCntNew*100/totalContrib.pass).toFixed(4);
-      if (+commit.pPctNew > passContribMax)
-        passContribMax = +commit.pPctNew;
-      commit["pCtbAcc"] = passContribMax.toFixed(4);
+      if (+commit.pPctNew > 0)
+        passContribIncrease += +commit.pPctNew;
+      commit["pCtbAcc"] = passContribIncrease.toFixed(4);
 
       if (+commit.cvgCtb > 0)
         coverageContribIncrease += +commit.cvgCtb;
