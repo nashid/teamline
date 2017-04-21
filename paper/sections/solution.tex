@@ -1,0 +1,42 @@
+\documentclass[../manifest.tex]{subfiles}
+
+\begin{document}
+
+Our solution is to create a derived quantitative attribute \textit{commitContribution} that describes
+the impact of a submission on the overall grade. In particular, the attribute is
+the difference between the current submission and the previously graded one. We
+visualize this along with other code metrics (Fig. \ref{fig:teaser}) to gain a more
+complete understanding of each student's contribution: those who made more grade-improving
+submissions should receive a higher retrospective grade. Note that this visualization
+is designed to assist the TAs in
+making a judgment when assigning a grade and cannot replace them since students may
+have chosen a different way to divide the work among team members.
+
+Here we use the what-why-how framework \cite{Munzner:2014} to abstract our solution to the vis domain.
+
+\textbf{What}. Table of graded submission records (items) with the attributes
+described in Table 1. The dataset is static once it has been loaded on the page
+but is dynamic in that the dataset grows with each new submission.
+
+\textbf{Why}. Compare the contributions of team members and derive a retrospective
+grade for each of them.
+
+\textbf{How}. Our vis includes many encodings and idioms:
+\begin{itemize}
+  \item Separate individual submissions and align them on two (or three)
+        parallel axes by timestamp.
+  \item Submissions are represented by area marks. Marks that overlap are collapsed into
+    a single point mark whose size encodes the number of submissions that were collapsed.
+  \item Marks are coloured with saturation encoding the overall grade for the submission (max saturation for a grade of 100\%).
+    We are okay with using a lower effectiveness encoding which may not be visible on marks showing only a single submission
+    because the final grade is not the focus of this vis.
+  \item Interaction allows details about a submission to be seen:
+    \begin{itemize}
+      \item Hovering over a single mark displays a popup with detailed information about the submission.
+      \item Clicking a single point opens a new browser tab that displays the corresponding commit on GitHub.
+      \item Hovering over a grouped mark expands it to show all submissions it includes. Once expanded,
+        the above interactions are allowed.
+    \end{itemize}
+\end{itemize}
+
+\end{document}

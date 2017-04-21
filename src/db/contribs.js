@@ -182,6 +182,7 @@ function contributionUniformityScore(contributions) {
 
 
 function aggregateDeliverable(users) {
+  var maxCoverage = 0;
   var userKeys = Object.keys(users);
   var totalContrib = {
     "pass": 0,
@@ -191,32 +192,37 @@ function aggregateDeliverable(users) {
   userKeys.forEach(function(key) {
     totalContrib.pass += users[key].ctb.pCnt;
     totalContrib.cover += users[key].ctb.cvg;
+
+    users[key].commits.forEach(function(commit) {
+      if (+commit.cvg > maxCoverage)
+        maxCoverage = +commit.cvg;
+    });
   });
 
   userKeys.forEach(function(key) {
     var testPct = 0;
     var coverPct = 0;
-    var passContribMax = 0;
+    var passContribIncrease = 0;
     var coverageContribIncrease = 0;
     if (totalContrib.pass > 0)
       testPct = users[key].ctb.pCnt*100/totalContrib.pass;
     if (totalContrib.cover > 0)
       coverPct = users[key].ctb.cvg*100/totalContrib.cover;
 
-    users[key].ctb.cvg = users[key].ctb.cvg.toFixed(4);
+    users[key].ctb.cvg = (users[key].ctb.cvg*100/maxCoverage).toFixed(4);
     users[key].ctb["tests"] = testPct.toFixed(4);
     users[key].ctb["overall"] = (0.8*testPct + 0.2*coverPct).toFixed(4);
 
     users[key].commits.forEach(function(commit) {
       if (totalContrib.pass > 0)
         commit.pPctNew = (commit.pCntNew*100/totalContrib.pass).toFixed(4);
-      if (+commit.pPctNew > passContribMax)
-        passContribMax = +commit.pPctNew;
-      commit["pCtbAcc"] = passContribMax.toFixed(4);
+      if (+commit.pPctNew > 0)
+        passContribIncrease += +commit.pPctNew;
+      commit["pCtbAcc"] = passContribIncrease.toFixed(4);
 
       if (+commit.cvgCtb > 0)
         coverageContribIncrease += +commit.cvgCtb;
-      commit["cvgCtbAcc"] = coverageContribIncrease.toFixed(4);
+      commit["cvgCtbAcc"] = (coverageContribIncrease*100/maxCoverage).toFixed(4);
 
 
     });
