@@ -87,7 +87,7 @@
 			values: values,
 			color: props[type].color
 		};
-		if (type === 'grade') {
+		if (username && type === 'grade') {
 			chartData.disabled = true;
 		}
 
