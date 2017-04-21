@@ -14,7 +14,7 @@
 
 	// Configuration settings
 	var settings = {
-		teamlineDataPath: '../../data/teamline-data-mini.json',
+		teamlineDataPath: 'teamline-data-mini.json',
 		deliverables: ['d1', 'd2', 'd3'],
 		views: { team: 'team', overview: 'overview' },
 		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
