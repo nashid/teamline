@@ -20,10 +20,33 @@
 		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
 		overviewColumns: 8,
 		margin: {top: 20, right: 50, bottom: 0, left: 50},
-		//legendMargin: {top: 10, right: 80, left: 0, bottom: 30},
 		marginTopToXAxis: 80, // TODO: don't know how to calculate this
 		tooltipDateFormat: 'MMMM Do YYYY, h:mm:ss a',
-		buttonAllLabel: 'all'
+		buttonAllLabel: 'all',
+		labels: {
+			team: {
+				grade: '% Grade'/*(80% Pass Rate + 20% Coverage)*/,
+				passRate: '% Pass Rate'/*(against instructor-written tests)*/,
+				coverage: '% Coverage'/*(of student-written tests)*/
+			},
+			user: {
+				grade: '', // niu
+				passRate: '% Contrib. to Pass Rate',
+				coverage: '% Contrib. to Coverage'
+			}
+		},
+		colors: {
+			team: {
+				grade: '#1b9e77',
+				passRate: '#d95f02',
+				coverage: '#7570b3'
+			},
+			user: {
+				grade: 'white', // niu
+				passRate: '#377eb8',
+				coverage: '#66a61e'
+			}
+		}
 	};
 
 	// Selectors for a few elements
@@ -37,40 +60,11 @@
 		teamlineCharts: '#teamline-charts'
 	};
 
-	// Some generators for field-specific chart properties
-	var props = {
-		passRate: {
-			label: function (username) {
-				if (username) {
-					return username + ' pass rate contribution';
-				} else {
-					return 'Team pass rate';
-				}
-			},
-			color: '#ff7f0e'
-		},
-		coverage: {
-			label: function (username) {
-				if (username) {
-					return username + ' coverage contribution';
-				} else {
-					return 'Team coverage';
-				}
-			},
-			color: '#667711'
-		},
-		grade: {
-			label: function() {
-				return 'Team grade';
-			},
-			color: '#A35BFF'
-		}
-	};
-
 	// Handlebars templates
 	var templates = {
 		tooltip: Handlebars.compile($("#tooltip-template").html()),
-		buttons: Handlebars.compile($("#buttons-template").html())
+		buttons: Handlebars.compile($("#buttons-template").html()),
+		legend: Handlebars.compile($("#legend-template").html())
 	};
 
 	function createChartData(type, commits, options) {
@@ -84,9 +78,9 @@
 			});
 		});
 		return {
-			key: props[type].label(options.username || null),
+			key: settings.labels[options.username ? 'user' : 'team'][type],
 			values: values,
-			color: props[type].color,
+			color: settings.colors[options.username ? 'user' : 'team'][type],
 			disabled: options.disabled === true
 		};
 	}
@@ -95,13 +89,27 @@
 	function tooltip(object) {
 		var point = object.point;
 		var items = [
-			{ label: 'Time', value: moment(point.time).format(settings.tooltipDateFormat) },
-			{ label: 'Grade', value: point.grd },
-			{ label: 'Passed Tests', value: point.pCnt },
-			{ label: 'Failed Tests', value: point.fCnt },
-			{ label: 'Skipped Tests', value: point.sCnt },
-			{ label: 'Coverage', value: point.cvg }
+			{ label: 'Time', value: moment(point.time).format(settings.tooltipDateFormat) }
 		];
+
+		var arrayToConcat;
+
+		if (point.username) {
+			arrayToConcat = [
+				{ label: 'Contrib. to Pass Rate', value: d3.format('%')(point.pCtbAcc / 100) },
+				{ label: 'Contrib. to Coverage', value: d3.format('%')(point.cvgCtbAcc / 100) }
+			];
+		} else {
+			arrayToConcat = [
+				{ label: 'Grade', value: d3.format('%')(point.grd / 100) },
+				{ label: 'Coverage', value: d3.format('%')(point.cvg / 100) },
+				{ label: 'Passed Tests', value: point.pCnt },
+				{ label: 'Failed Tests', value: point.fCnt },
+				{ label: 'Skipped Tests', value: point.sCnt }
+			];
+		}
+
+		items = items.concat(arrayToConcat);
 		return templates.tooltip({ items: items });
 	}
 
@@ -138,9 +146,9 @@
 				.tooltipContent(options.tooltip || tooltip)
 				.x(options.x)
 				.y(options.y)
-				.showLegend(false)
 				.showYAxis(options.showYAxis !== false)
-				.showXAxis(options.showXAxis !== false);
+				.showXAxis(options.showXAxis !== false)
+				.showLegend(false);
 
 			var d3obj = d3.select(chartSelector).datum(options.data);
 
@@ -159,7 +167,6 @@
 			// TODO: WORK OVER THIS!
 			// 1209600000 = 2 weeks in ms; 172800000 = 1 day in ms
 			chart.forceY([deliverable.release-57600000, deliverable.due+57600000]);
-			//chart.legend.margin(settings.legendMargin);
 
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
 
@@ -171,9 +178,14 @@
 		});
 	}
 
+	function addLegend(containerSelector, items) {
+		$(containerSelector).prepend(templates.legend({ items: items }));
+	}
+
 	function drawGradeChart(context) {
+		var containerSelector = '#grade-chart-container';
 		drawChart({
-			containerSelector: '#grade-chart-container',
+			containerSelector: containerSelector,
 			margin: {top: 0, right: 0, bottom: 0, left: 50},
 			data: [context.gradeChartData.coverage, context.gradeChartData.passRate, context.gradeChartData.grade],
 			x: function(commit) {
@@ -190,6 +202,11 @@
 			xTickPadding: -15,
 			yTickPadding: 5
 		});
+		addLegend(containerSelector, [
+			{ key: 'teamPassRate', label: settings.labels.team.passRate, color: settings.colors.team.passRate },
+			{ key: 'teamCoverage', label: settings.labels.team.coverage, color: settings.colors.team.coverage },
+			{ key: 'teamGrade', label: settings.labels.team.grade, color: settings.colors.team.grade }
+		]);
 	}
 
 	function drawIndividualChart(containerSelector, username, chartData, options) {
@@ -280,6 +297,13 @@
 					passRate: createChartData('passRate', userCommits, { username: username }),
 					coverage: createChartData('coverage', userCommits, { username: username })
 				});
+			}
+
+			if (index === 0) {
+				addLegend(containerSelector, [
+					{ label: settings.labels.user.passRate, color: settings.colors.user.passRate },
+					{ label: settings.labels.user.coverage, color: settings.colors.user.coverage }
+				]);
 			}
 		});
 	}

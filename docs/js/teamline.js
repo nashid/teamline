@@ -153,6 +153,10 @@
 				return d3.time.format('%b %d')(new Date(timestamp))
 			});
 			chart.yAxis.tickPadding(options.yTickPadding || 0);
+
+			chart.xAxis.axisLabel("LABELX");
+			chart.yAxis.axisLabel("LABELY");
+
 			chart.forceX(options.forceX);
 
 			chart.forceX([0, 110]);
