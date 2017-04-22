@@ -14,14 +14,27 @@
     <body>
 
         <div id="teamline">
-            <div id="teamline-legend">
+            <div id="teamline-menu">
                 <div id="teamline-buttons"></div>
-                <a class="back-to-overview" href="#">Back to Overview</a>
             </div>
-            <div id="teamline-overview"><table></table></div>
-            <div id="teamline-charts">
-                <svg id="grade-chart"></svg>
+            <div id="teamline-stage">
+                <div id="teamline-overview"><table></table></div>
+                <div id="teamline-charts">
+                    <div id="grade-chart-container">
+                        <svg></svg>
+                    </div>
+                    <div id="user-chart-1-container">
+                        <svg class="user-chart"></svg>
+                    </div>
+                    <div id="user-chart-2-container">
+                        <svg class="user-chart"></svg>
+                    </div>
+                </div>
+                <div id="teamline-gallery">
+
+                </div>
             </div>
+
         </div>
 
         <script id="tooltip-template" type="text/x-handlebars-template">

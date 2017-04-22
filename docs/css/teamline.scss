@@ -1,11 +1,4 @@
 #teamline {
-  position: relative;
-
-  ul {
-    padding: 0;
-    margin: 0;
-  }
-
   &.visible {
     display: block;
   }
@@ -26,19 +19,6 @@
     &:focus {
       outline: none;
     }
-  }
-}
-
-#teamline-legend-details {
-  position: absolute;
-  padding: 10px;
-  bottom: 19px;
-  right: 20px;
-  background: white;
-  border: 3px solid #ccc;
-
-  li {
-    list-style-type: none;
   }
 }
 
@@ -94,6 +74,11 @@
     stroke-opacity: 1;
     stroke-width: 3px;
     fill-opacity: 1;
+  }
+
+  .duedate-line {
+    stroke: solid;
+    stroke-dasharray: 5,5;
   }
 
   .nv-x {
@@ -188,57 +173,6 @@
 
       }
 
-    }
-  }
-}
-
-.chart-container {
-  position: relative;
-
-  &#grade-chart-container .teamline-legend {
-    left: 55px;
-  }
-  &.user-chart-container .teamline-legend {
-    left: 10px;
-  }
-
-  .teamline-legend {
-    position: absolute;
-    top: 3px;
-
-    li {
-      list-style-type: none;
-      display: inline-block;
-      position: relative;
-      margin-right: 7px;
-
-      &:after {
-        top: 0;
-        display: block;
-        position: absolute;
-      }
-
-      &:nth-child(1):after {
-        right: -6px;
-        content: "*";
-      }
-      &:nth-child(2):after {
-        right: -11px;
-        content: "**";
-      }
-      &:nth-child(3):after {
-        right: -16px;
-        content: "***";
-      }
-
-      .symbol {
-        margin-left: 5px;
-        margin-right: 3px;
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 10px;
-      }
     }
   }
 }

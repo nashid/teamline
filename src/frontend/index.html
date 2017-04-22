@@ -20,12 +20,23 @@
             <div id="teamline-stage">
                 <div id="teamline-overview"><table></table></div>
                 <div id="teamline-charts">
-                    <svg id="chart-1"></svg>
-                    <svg id="chart-2"></svg>
-                    <svg id="chart-3"></svg>
+                    <div id="grade-chart-container" class="chart-container">
+                        <svg></svg>
+                    </div>
+                    <div id="user-chart-1-container" class="chart-container user-chart-container">
+                        <svg class="user-chart"></svg>
+                    </div>
+                    <div id="user-chart-2-container" class="chart-container user-chart-container">
+                        <svg class="user-chart"></svg>
+                    </div>
                 </div>
-                <div id="teamline-gallery">
-
+                <div id="teamline-gallery"></div>
+                <div id="teamline-legend-details">
+                    <ul>
+                        <li>* 80% Pass Rate + 20% Coverage</li>
+                        <li>** against instructor-written tests</li>
+                        <li>*** of student-written tests</li>
+                    </ul>
                 </div>
             </div>
 
@@ -46,6 +57,16 @@
                 {{#each buttons}}
                 <button data-deliverable="{{this.deliverable}}" type="button" class="btn btn-default {{classes}}">{{this.label}}</button>
                 {{/each}}
+            </div>
+        </script>
+
+        <script id="legend-template" type="text/x-handlebars-template">
+            <div class="teamline-legend">
+                <ul>
+                    {{#each items}}
+                    <li><span class="symbol" data-key="{{this.key}}" style="background: {{this.color}};"></span><span class="content">{{this.label}}</span></li>
+                    {{/each}}
+                </ul>
             </div>
         </script>
 
