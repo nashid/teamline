@@ -17,8 +17,17 @@
 #teamline-menu {
   width: 100%;
   height: 6%;
-  text-align: center;
-  padding-top: 5px;
+  padding: 5px 51px;
+  > * {
+    display: inline-block;
+  }
+}
+
+#teamline-team {
+  vertical-align: middle;
+  padding: 0 20px;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 #teamline-buttons {
@@ -46,6 +55,12 @@
   width: 100%;
   height: 94%;
 
+  .username-container {
+    width: 100%;
+    position: absolute;
+    text-align: center;
+  }
+
   #teamline-charts {
     $border: 3px solid #ccc;
     overflow: auto;
@@ -72,11 +87,19 @@
         width: 30%;
       }
     }
+
+    .username-container {
+      bottom: 24px;
+      left: 10px;
+      font-size: 22px;
+    }
   }
+
   #teamline-gallery {
     width: 100%;
     height: 25%;
   }
+
 }
 
 #teamline-charts svg {
@@ -147,6 +170,7 @@
   padding: 10px;
 
   .gallery-chart-container {
+    position: relative;
     float: left;
     width: 170px;
     border: 3px solid #ccc;
@@ -154,13 +178,18 @@
     background: white;
     background-image: url('../images/unchecked.png');
     background-size: 20px 20px;
-    background-position: 98% 98%;
+    background-position: 102% -2%;
     background-repeat: no-repeat;
 
     &.active {
       background-image: url('../images/checked.png');
       border-color: #62b1f6;
     }
+
+    .username-container {
+      bottom: 2px;
+    }
+
   }
 
   svg {

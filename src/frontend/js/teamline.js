@@ -85,6 +85,10 @@
 		};
 	}
 
+	function createDateLine(date) {
+
+	}
+
 	// Generates the HTML for the tooltips upon hover using Handlebars templating
 	function tooltip(object) {
 		var point = object.point;
@@ -166,7 +170,7 @@
 			chart.forceX([0, 110]);
 			// TODO: WORK OVER THIS!
 			// 1209600000 = 2 weeks in ms; 172800000 = 1 day in ms
-			chart.forceY([deliverable.release-57600000, deliverable.due+57600000]);
+			chart.forceY([deliverable.release-172800000, deliverable.due+172800000]);
 
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
 
@@ -179,7 +183,10 @@
 	}
 
 	function addLegend(containerSelector, items) {
-		$(containerSelector).prepend(templates.legend({ items: items }));
+		var $container = $(containerSelector);
+		if (!$container.find('.teamline-legend').length) {
+			$(containerSelector).prepend(templates.legend({ items: items }));
+		}
 	}
 
 	function drawGradeChart(context) {
@@ -248,6 +255,8 @@
 		var userData = targetDeliverable.users;
 		var usernames = Object.keys(userData).sort();
 		var allCommits = [], gradeChartData, disabledGradeData, emptyChartData;
+		var dateLineRelease = createDateLine('release', targetDeliverable.release),
+			dateLineDue = createDateLine('due', targetDeliverable.due);
 
 		$.each(usernames, function(index, username) {
 			var userCommits = userData[username].commits;
@@ -261,7 +270,9 @@
 		gradeChartData = {
 			grade: createChartData('grade', allCommits),
 			passRate: createChartData('passRate', allCommits),
-			coverage: createChartData('coverage', allCommits)
+			coverage: createChartData('coverage', allCommits),
+			release: dateLineRelease,
+			due: dateLineDue
 		};
 
 		disabledGradeData = $.extend({}, gradeChartData.grade);
@@ -270,7 +281,9 @@
 		emptyChartData = {
 			grade: disabledGradeData,
 			passRate: createChartData('passRate', []),
-			coverage: createChartData('coverage', [])
+			coverage: createChartData('coverage', []),
+			release: dateLineRelease,
+			due: dateLineDue
 		};
 
 		return {
@@ -298,6 +311,7 @@
 					coverage: createChartData('coverage', userCommits, { username: username })
 				});
 			}
+			$(containerSelector).find('.username-container').html(username && ('User: ' + username) || '');
 
 			if (index === 0) {
 				addLegend(containerSelector, [
@@ -319,6 +333,8 @@
 				passRate: createChartData('passRate', userCommits, { username: username }),
 				coverage: createChartData('coverage', userCommits, { username: username })
 			};
+			var $usernameContainer = $('<div class="username-container">').html('User: '+username);
+			$(galleryContainerSelector).append($usernameContainer);
 			drawIndividualChart(galleryContainerSelector, username, chartData, {
 				showYAxis: false,
 				showXAxis: false,
@@ -425,6 +441,15 @@
 		}
 	}
 
+	function setTeamName() {
+		var teamName = currentState.teamName;
+		var teamNameUpperCase;
+		if (teamName) {
+			teamNameUpperCase = teamName.charAt(0).toUpperCase() + teamName.slice(1);
+		}
+		$('#teamline-team').html(teamNameUpperCase || '');
+	}
+
 	$.getJSON(settings.teamlineDataPath, function(data) {
 		var buttons, bodyHeight = $(document.body).outerHeight();
 		globalData = data;
@@ -438,6 +463,7 @@
 
 	$(window).on('teamline.state.updated', function(e) {
 		$(select.container).attr('data-view', currentState.view);
+		setTeamName();
 		if (currentState.view === settings.views.team) {
 			if (currentState.lastTrigger === 'gallery') {
 				$('.user-chart').html('');
