@@ -1,5 +1,37 @@
 \documentclass[../manifest.tex]{subfiles}
 
 \begin{document}
-Abstractions
+Our tool visualizes data collected by AutoTest\footnote{http://github.com/nickbradley/autotest},
+an automatic grading service used to grade code submissions for students in
+CPSC310. The course is structured around a term-long coding project that is
+divided into 5 deliverables/sprints completed by teams consisting of 2-3 students.
+The first 3 of these deliverables are graded by a combination of AutoTest and TAs.
+Teams manage their shared code on GitHub\footnote{http://github.com}
+using a basic git workflow: students pull the latest code changes from GitHub,
+commit their modified code locally and then push those commits to GitHub for
+other members to see. Every time a student pushes their changes, AutoTest is
+automatically invoked and runs a private suite of tests against the modified
+code. Results are stored in a NoSQL database with each record corresponding to a
+single submission (push event). The relevant attributes are briefly described in
+Table 1. We have collected data for over 24,000 submissions for the first two
+deliverables; complete data for the third deliverable will be available on March
+13. There are 285 students in 139 teams.
+
+After a submission deadline, TAs meet with their assigned
+teams to conduct a retrospective to discuss any challenges that arose
+during the sprint and to ensure that the work was equitably distributed among the
+team members. This typically consists of a TA asking some questions designed to
+gauge a student's comprehension of the task and code. They may go so far as to
+explicitly and privately ask each student how evenly they felt the workload was
+split. Based on the retrospective, the TAs assign a scaling factor to the deliverable grade. For example, if
+the team got 90\% on the deliverable but one member did most of the work, the final
+grades might be 90\%*1.0 = 90\% and 90\%*0.6 = 54\%. Unfortunately, it can be hard
+to determine how much work was done by each student from these conversations since
+the team member who contributed very little will attempt to spoof the TA while the
+hard-working one may not want to rat out their partner. One possible solution is
+to look at the commit history on GitHub to determine how many commits each student
+made. This can be a decent proxy but can be misleading since different people have
+different commit habits (some will commit every line, others only large changes)
+and they may not reflect the actual contribution to the grade (i.e. commits that
+don't directly increase the grade).
 \end{document}
