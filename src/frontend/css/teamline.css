@@ -29,17 +29,29 @@
 /* line 26, teamline.scss */
 #teamline-team {
   vertical-align: middle;
-  padding: 0 20px;
-  font-size: 24px;
   font-weight: bold;
+  padding: 0 6px;
+  font-size: 22px;
+  margin: 0 10px;
+  width: 150px;
+  text-align: center;
+}
+/* line 34, teamline.scss */
+#teamline-team:not(:focus) {
+  background: inherit;
+  border: none;
+}
+/* line 38, teamline.scss */
+#teamline-team:focus {
+  outline: none;
 }
 
-/* line 35, teamline.scss */
+/* line 45, teamline.scss */
 #teamline-buttons button:focus {
   outline: none;
 }
 
-/* line 41, teamline.scss */
+/* line 51, teamline.scss */
 #teamline-legend-details {
   position: absolute;
   padding: 10px;
@@ -48,23 +60,23 @@
   background: white;
   border: 3px solid #ccc;
 }
-/* line 49, teamline.scss */
+/* line 59, teamline.scss */
 #teamline-legend-details li {
   list-style-type: none;
 }
 
-/* line 54, teamline.scss */
+/* line 64, teamline.scss */
 #teamline-stage {
   width: 100%;
   height: 94%;
 }
-/* line 58, teamline.scss */
+/* line 68, teamline.scss */
 #teamline-stage .username-container {
   width: 100%;
   position: absolute;
   text-align: center;
 }
-/* line 64, teamline.scss */
+/* line 74, teamline.scss */
 #teamline-stage #teamline-charts {
   overflow: auto;
   width: 100%;
@@ -73,88 +85,100 @@
   border-top: 3px solid #ccc;
   border-bottom: 3px solid #ccc;
 }
-/* line 73, teamline.scss */
+/* line 83, teamline.scss */
 #teamline-stage #teamline-charts > div {
   float: left;
   width: 33.333333%;
   height: 100%;
 }
-/* line 78, teamline.scss */
+/* line 88, teamline.scss */
 #teamline-stage #teamline-charts > div:nth-child(1) {
   width: 40%;
 }
-/* line 81, teamline.scss */
+/* line 91, teamline.scss */
 #teamline-stage #teamline-charts > div:nth-child(2) {
   width: 30%;
 }
-/* line 85, teamline.scss */
+/* line 95, teamline.scss */
 #teamline-stage #teamline-charts > div:nth-child(3) {
   width: 30%;
 }
-/* line 91, teamline.scss */
+/* line 101, teamline.scss */
 #teamline-stage #teamline-charts .username-container {
-  bottom: 24px;
+  bottom: 15px;
   left: 10px;
   font-size: 22px;
 }
-/* line 98, teamline.scss */
+/* line 108, teamline.scss */
 #teamline-stage #teamline-gallery {
   width: 100%;
   height: 25%;
 }
 
-/* line 106, teamline.scss */
+/* line 116, teamline.scss */
 #teamline-charts svg .nv-axisMaxMin-y {
   display: none;
 }
-/* line 109, teamline.scss */
+/* line 119, teamline.scss */
 #teamline-charts svg .nv-axisMin-x {
   transform: translate(10px, 0) !important;
 }
-/* line 112, teamline.scss */
+/* line 122, teamline.scss */
 #teamline-charts svg .nv-axisMax-x {
   display: none;
 }
-/* line 116, teamline.scss */
+/* line 126, teamline.scss */
 #teamline-charts svg .nv-point {
   stroke-opacity: 1;
   stroke-width: 3px;
   fill-opacity: 1;
 }
-/* line 124, teamline.scss */
+/* line 134, teamline.scss */
 #teamline-charts svg .nv-x .nv-axis .tick:last-of-type text {
   transform: translate(-15px, 0);
   font-weight: bold;
 }
-/* line 133, teamline.scss */
-#teamline-charts svg .nv-y .nv-axis .tick:nth-last-of-type(1) line, #teamline-charts svg .nv-y .nv-axis .tick:nth-of-type(2) line {
-  stroke-width: 3px;
-  stroke: #aaa;
-  stroke-dasharray: 5,5;
-}
-/* line 141, teamline.scss */
+/* line 145, teamline.scss */
 #teamline-charts svg .nv-y .nv-axis .tick:first-child line {
   display: none;
 }
-/* line 145, teamline.scss */
-#teamline-charts svg .nv-y .nv-axis .tick:nth-last-of-type(1) {
-  position: relative;
+/* line 155, teamline.scss */
+#teamline-charts svg.grade-chart .nv-series-3 .nv-point, #teamline-charts svg.grade-chart .nv-series-4 .nv-point {
+  display: none;
 }
-/* line 161, teamline.scss */
+/* line 162, teamline.scss */
 #teamline-charts svg.user-chart .nv-y .nv-axis .tick text {
   display: none;
 }
+/* line 167, teamline.scss */
+#teamline-charts svg.user-chart .nv-series-2 .nv-point, #teamline-charts svg.user-chart .nv-series-3 .nv-point {
+  display: none;
+}
+/* line 174, teamline.scss */
+#teamline-charts svg .nv-group.dashed {
+  stroke-dasharray: 10, 5;
+  stroke-width: 4px !important;
+}
+/* line 178, teamline.scss */
+#teamline-charts svg .nv-group.release {
+  color: red;
+}
+/* line 181, teamline.scss */
+#teamline-charts svg .nv-group.due {
+  color: blue;
+}
 
-/* line 168, teamline.scss */
+/* line 190, teamline.scss */
 #teamline-gallery {
   overflow: auto;
   padding: 10px;
 }
-/* line 172, teamline.scss */
+/* line 194, teamline.scss */
 #teamline-gallery .gallery-chart-container {
   position: relative;
   float: left;
   width: 170px;
+  height: 160px;
   border: 3px solid #ccc;
   margin-right: 10px;
   background: white;
@@ -163,30 +187,34 @@
   background-position: 102% -2%;
   background-repeat: no-repeat;
 }
-/* line 184, teamline.scss */
+/* line 207, teamline.scss */
 #teamline-gallery .gallery-chart-container.active {
   background-image: url("../images/checked.png");
   border-color: #62b1f6;
 }
-/* line 189, teamline.scss */
+/* line 212, teamline.scss */
 #teamline-gallery .gallery-chart-container .username-container {
   bottom: 2px;
 }
-/* line 196, teamline.scss */
+/* line 216, teamline.scss */
+#teamline-gallery .gallery-chart-container .dateline {
+  display: none;
+}
+/* line 223, teamline.scss */
 #teamline-gallery svg .nv-point-paths {
   display: none;
 }
 
-/* line 203, teamline.scss */
+/* line 230, teamline.scss */
 .teamline-tooltip ul {
   margin: 0;
   padding: 5px;
 }
-/* line 207, teamline.scss */
+/* line 234, teamline.scss */
 .teamline-tooltip ul li {
   list-style-type: none;
 }
-/* line 210, teamline.scss */
+/* line 237, teamline.scss */
 .teamline-tooltip ul li .label {
   font-size: 100%;
   color: black;
@@ -194,52 +222,52 @@
   font-weight: bold;
 }
 
-/* line 224, teamline.scss */
+/* line 251, teamline.scss */
 .chart-container {
   position: relative;
 }
-/* line 227, teamline.scss */
+/* line 254, teamline.scss */
 .chart-container#grade-chart-container .teamline-legend {
   left: 55px;
 }
-/* line 230, teamline.scss */
+/* line 257, teamline.scss */
 .chart-container.user-chart-container .teamline-legend {
   left: 10px;
 }
-/* line 234, teamline.scss */
+/* line 261, teamline.scss */
 .chart-container .teamline-legend {
   position: absolute;
   top: 3px;
 }
-/* line 238, teamline.scss */
+/* line 265, teamline.scss */
 .chart-container .teamline-legend li {
   list-style-type: none;
   display: inline-block;
   position: relative;
   margin-right: 7px;
 }
-/* line 244, teamline.scss */
+/* line 271, teamline.scss */
 .chart-container .teamline-legend li:after {
   top: 0;
   display: block;
   position: absolute;
 }
-/* line 250, teamline.scss */
+/* line 277, teamline.scss */
 .chart-container .teamline-legend li:nth-child(1):after {
   right: -6px;
   content: "*";
 }
-/* line 254, teamline.scss */
+/* line 281, teamline.scss */
 .chart-container .teamline-legend li:nth-child(2):after {
   right: -11px;
   content: "**";
 }
-/* line 258, teamline.scss */
+/* line 285, teamline.scss */
 .chart-container .teamline-legend li:nth-child(3):after {
   right: -16px;
   content: "***";
 }
-/* line 263, teamline.scss */
+/* line 290, teamline.scss */
 .chart-container .teamline-legend li .symbol {
   margin-left: 5px;
   margin-right: 3px;

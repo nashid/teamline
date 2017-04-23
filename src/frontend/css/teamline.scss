@@ -25,9 +25,19 @@
 
 #teamline-team {
   vertical-align: middle;
-  padding: 0 20px;
-  font-size: 24px;
   font-weight: bold;
+  padding: 0 6px;
+  font-size: 22px;
+  margin: 0 10px;
+  width: 150px;
+  text-align: center;
+  &:not(:focus) {
+    background: inherit;
+    border: none;
+  }
+  &:focus {
+    outline: none;
+  }
 }
 
 #teamline-buttons {
@@ -89,7 +99,7 @@
     }
 
     .username-container {
-      bottom: 24px;
+      bottom: 15px;
       left: 10px;
       font-size: 22px;
     }
@@ -130,29 +140,20 @@
 
   .nv-y {
     .nv-axis {
-      %dashed-line {
-        stroke-width: 3px;
-        stroke: #aaa;
-        stroke-dasharray: 5,5;
-      }
-
       .tick {
         &:first-child {
           line {
             display: none;
           }
         }
-        &:nth-last-of-type(1) {
-          position: relative;
-          line {
-            @extend %dashed-line;
-          }
-        }
-        &:nth-of-type(2) {
-          line {
-            @extend %dashed-line;
-          }
-        }
+      }
+    }
+  }
+
+  &.grade-chart {
+    .nv-series-3, .nv-series-4 {
+      .nv-point {
+        display: none;
       }
     }
   }
@@ -161,7 +162,28 @@
     .nv-y .nv-axis .tick text {
       display: none;
     }
+
+    .nv-series-2, .nv-series-3 {
+      .nv-point {
+        display: none;
+      }
+    }
   }
+
+  .nv-group {
+    &.dashed {
+      stroke-dasharray: 10, 5;
+      stroke-width: 4px !important;
+    }
+    &.release {
+      color: red;
+    }
+    &.due {
+      color: blue;
+    }
+  }
+
+
 
 }
 
@@ -173,6 +195,7 @@
     position: relative;
     float: left;
     width: 170px;
+    height: 160px;
     border: 3px solid #ccc;
     margin-right: 10px;
     background: white;
@@ -188,6 +211,10 @@
 
     .username-container {
       bottom: 2px;
+    }
+
+    .dateline {
+      display: none;
     }
 
   }
