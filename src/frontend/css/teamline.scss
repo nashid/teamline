@@ -6,6 +6,12 @@
     margin: 0;
   }
 
+  button {
+    &:focus {
+      outline: none;
+    }
+  }
+
   &.visible {
     display: block;
   }
@@ -37,14 +43,6 @@
   }
   &:focus {
     outline: none;
-  }
-}
-
-#teamline-buttons {
-  button {
-    &:focus {
-      outline: none;
-    }
   }
 }
 

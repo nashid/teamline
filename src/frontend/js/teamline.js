@@ -67,6 +67,14 @@
 		legend: Handlebars.compile($("#legend-template").html())
 	};
 
+	// Central function for changing the global state. The state is extended by the given object, which means
+	// we don't need to pass all the information all the time.
+	function updateState(trigger, stateObj) {
+		currentState = $.extend(currentState, stateObj);
+		currentState.lastTrigger = trigger;
+		$(window).trigger('teamline.state.updated');
+	}
+
 	function createChartData(type, commits, options) {
 		var values;
 		options = $.extend({}, options);
@@ -101,39 +109,32 @@
 			{ label: 'Time', value: moment(point.time).format(settings.tooltipDateFormat) }
 		];
 
-		var arrayToConcat;
-
 		if (point.username) {
-			arrayToConcat = [
+			items = items.concat([
 				{ label: 'Contrib. to Pass Rate', value: d3.format('%')(point.pCtbAcc / 100) },
 				{ label: 'Contrib. to Coverage', value: d3.format('%')(point.cvgCtbAcc / 100) }
-			];
+			]);
 		} else {
-			arrayToConcat = [
+			items = items.concat([
 				{ label: 'Grade', value: d3.format('%')(point.grd / 100) },
 				{ label: 'Coverage', value: d3.format('%')(point.cvg / 100) },
 				{ label: 'Passed Tests', value: point.pCnt },
 				{ label: 'Failed Tests', value: point.fCnt },
 				{ label: 'Skipped Tests', value: point.sCnt }
-			];
+			]);
 		}
 
-		items = items.concat(arrayToConcat);
 		return templates.tooltip({ items: items });
 	}
 
 	// Adds the deliverable buttons to the DOM
 	function addButtons(deliverables) {
-		var buttons = [];
+		var buttons = [], renderedTemplate;
 		$.each(deliverables, function(index, deliverable) {
 			buttons.push({deliverable: deliverable, label: deliverable.toUpperCase(), classes: index === 0 ? 'active' : ''});
 		});
-		var renderedTemplate = templates.buttons({buttons: buttons});
+		renderedTemplate = templates.buttons({buttons: buttons});
 		$('#teamline-buttons').append(renderedTemplate);
-	}
-
-	function getChartId(username) {
-		return 'chart-'+username;
 	}
 
 	function drawChart(options) {
@@ -360,7 +361,6 @@
 	}
 
 	// Draws a team chart based on the current global state
-	// TODO: need to think about deliverable start date, end date and what date range to show in the chart!
 	function drawTeamCharts() {
 		var context = createChartContext();
 		drawGradeChart(context);
@@ -395,15 +395,13 @@
 		}
 	}
 
-	// Always call this when something in the view needs to update, i.e. when the global state has changed
-	function updateView() {
-		$(select.chart+','+select.overview).html('');
-		$(select.container).attr('data-view', currentState.view);
-		if (currentState.view === settings.views.team) {
-			drawTeamCharts();
-		} else {
-			createOverview();
+	function setTeamName() {
+		var teamName = currentState.teamName;
+		var teamNameUpperCase;
+		if (teamName) {
+			teamNameUpperCase = teamName.charAt(0).toUpperCase() + teamName.slice(1);
 		}
+		$('#teamline-team').val(teamNameUpperCase || '');
 	}
 
 	// Called when a deliverable button was clicked
@@ -419,19 +417,6 @@
 		var $td = $(this);
 		var teamName = $td.attr('data-teamname');
 		updateState('overviewcell', { view: settings.views.team, teamName: teamName });
-		if (!teamData[teamName]) {
-			loadData(updateView);
-		} else {
-			updateView();
-		}
-	}
-
-	// Central function for changing the global state. The state is extended by the given object, which means
-	// we don't need to pass all the information all the time.
-	function updateState(trigger, stateObj) {
-		currentState = $.extend(currentState, stateObj);
-		currentState.lastTrigger = trigger;
-		$(window).trigger('teamline.state.updated');
 	}
 
 	function onGalleryItemClick(e) {
@@ -456,13 +441,11 @@
 		}
 	}
 
-	function setTeamName() {
-		var teamName = currentState.teamName;
-		var teamNameUpperCase;
-		if (teamName) {
-			teamNameUpperCase = teamName.charAt(0).toUpperCase() + teamName.slice(1);
+	function onTeamChange(e) {
+		var value = $(this).val().toLowerCase();
+		if (globalData.teams[value]) {
+			updateState('teamchange', { teamName: value });
 		}
-		$('#teamline-team').val(teamNameUpperCase || '');
 	}
 
 	$.getJSON(settings.teamlineDataPath, function(data) {
@@ -490,13 +473,6 @@
 			}
 		}
 	});
-
-	function onTeamChange(e) {
-		var value = $(this).val().toLowerCase();
-		if (globalData.teams[value]) {
-			updateState('teamchange', { teamName: value });
-		}
-	}
 
 	$(select.buttons).on('click', 'button', onButtonClick);
 	$(select.overview).on('click', 'td', onOverviewTdClick);
