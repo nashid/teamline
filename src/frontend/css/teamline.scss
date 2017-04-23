@@ -1,5 +1,10 @@
+$grey_border: 3px solid #ccc;
+
 #teamline {
   position: relative;
+  display: none;
+  width: 100%;
+  background: #fcf8e3;
 
   ul {
     padding: 0;
@@ -15,21 +20,65 @@
   &.visible {
     display: block;
   }
-  display: none;
-  width: 100%;
-  background: #fcf8e3;
+
+  &[data-view="team"] {
+    #teamline-overview {
+      display: none;
+    }
+  }
+
+  &[data-view="overview"] {
+    #teamline-charts, #teamline-gallery, #teamline-legend-details {
+      display: none;
+    }
+    #back-button {
+      visibility: hidden;
+    }
+  }
+
+  svg {
+    .nv-noData {
+      display: none;
+    }
+  }
+
+}
+
+#teamline-overview {
+  padding-bottom: 20px;
+
+  > div {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+    color: #444;
+    &:hover {
+      background-color: #aaa !important;
+      color: white;
+      cursor: pointer;
+    }
+  }
+
+  &.drawing svg {
+    display: none;
+  }
 }
 
 #teamline-menu {
   width: 100%;
   height: 6%;
   padding: 5px 51px;
+  border-bottom: $grey_border;
+
   > * {
     display: inline-block;
   }
 }
 
-#teamline-team {
+#teamline-heading-input {
   vertical-align: middle;
   font-weight: bold;
   padding: 0 6px;
@@ -62,25 +111,23 @@
 #teamline-stage {
   width: 100%;
   height: 94%;
+  overflow: auto;
 
   .username-container {
-    width: 100%;
+    width: 95%;
     position: absolute;
     text-align: center;
   }
 
   #teamline-charts {
-    $border: 3px solid #ccc;
     overflow: auto;
     width: 100%;
     height: 75%;
     background: white;
-    border-top: $border;
-    border-bottom: $border;
+    border-bottom: $grey_border;
 
     > div {
       float: left;
-      width: 33.333333%;
       height: 100%;
 
       &:nth-child(1) {

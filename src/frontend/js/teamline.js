@@ -15,14 +15,7 @@
 	// Configuration settings
 	var settings = {
 		teamlineDataPath: 'teamline-data-mini.json',
-		deliverables: ['d1', 'd2', 'd3'],
-		views: { team: 'team', overview: 'overview' },
-		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
-		overviewColumns: 8,
-		margin: {top: 20, right: 50, bottom: 0, left: 50},
-		marginTopToXAxis: 80, // TODO: don't know how to calculate this
-		tooltipDateFormat: 'MMMM Do YYYY, h:mm:ss a',
-		buttonAllLabel: 'all',
+		numberRegex: /\d+/,
 		labels: {
 			team: {
 				grade: '% Grade'/*(80% Pass Rate + 20% Coverage)*/,
@@ -49,23 +42,16 @@
 		}
 	};
 
-	// Selectors for a few elements
-	var select = {
-		container: '#teamline',
-		chart: '#grade-chart',
-		chartUser1: '#user-chart-1',
-		chartUser2: '#user-chart-2',
-		overview: '#teamline-overview table',
-		buttons: '#teamline-buttons',
-		teamlineCharts: '#teamline-charts'
-	};
-
 	// Handlebars templates
 	var templates = {
 		tooltip: Handlebars.compile($("#tooltip-template").html()),
 		buttons: Handlebars.compile($("#buttons-template").html()),
 		legend: Handlebars.compile($("#legend-template").html())
 	};
+
+	function firstLetterUpperCase(string) {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
 
 	// Central function for changing the global state. The state is extended by the given object, which means
 	// we don't need to pass all the information all the time.
@@ -106,7 +92,7 @@
 	function tooltip(object) {
 		var point = object.point;
 		var items = [
-			{ label: 'Time', value: moment(point.time).format(settings.tooltipDateFormat) }
+			{ label: 'Time', value: moment(point.time).format('MMMM Do YYYY, h:mm:ss a') }
 		];
 
 		if (point.username) {
@@ -135,6 +121,13 @@
 		});
 		renderedTemplate = templates.buttons({buttons: buttons});
 		$('#teamline-buttons').append(renderedTemplate);
+	}
+
+	function addLegend(containerSelector, items) {
+		var $container = $(containerSelector);
+		if (!$container.find('.teamline-legend').length) {
+			$(containerSelector).prepend(templates.legend({ items: items }));
+		}
 	}
 
 	function drawChart(options) {
@@ -183,14 +176,10 @@
 			nv.utils.windowResize(function() {
 				updateSize(d3obj, chart);
 			});
-		});
-	}
 
-	function addLegend(containerSelector, items) {
-		var $container = $(containerSelector);
-		if (!$container.find('.teamline-legend').length) {
-			$(containerSelector).prepend(templates.legend({ items: items }));
-		}
+			options.done && options.done();
+
+		});
 	}
 
 	function drawGradeChart(context) {
@@ -247,67 +236,6 @@
 		drawChart($.extend(defaults, options));
 	}
 
-	function appendGalleryChartContainer(username, hasFocus) {
-		var containerSelector = '.gallery-chart-container[data-username="'+username+'"]';
-		var $chartContainer = $('<div class="gallery-chart-container" data-username="'+username+'">');
-		var $svg = $('<svg class="gallery-chart"></svg>');
-		if (hasFocus) {
-			$chartContainer.addClass('active');
-		}
-		$chartContainer.append($svg);
-		$('#teamline-gallery').append($chartContainer);
-		return containerSelector;
-	}
-
-	function createChartContext() {
-		var teamData = globalData.teams[currentState.teamName];
-		var deliverableObj = globalData.deliverables[currentState.deliverableName];
-		var targetDeliverable = teamData[currentState.deliverableName];
-		var userData = targetDeliverable.users;
-		var usernames = Object.keys(userData).sort();
-		var allCommits = [], gradeChartData, disabledGradeData, emptyChartData;
-		var dateLineRelease = createDateLine('release', deliverableObj.release),
-			dateLineDue = createDateLine('due', deliverableObj.due);
-
-		$.each(usernames, function(index, username) {
-			var userCommits = userData[username].commits;
-			allCommits = allCommits.concat(userCommits);
-		});
-
-		allCommits.sort(function(commit1, commit2) {
-			return commit1.time - commit2.time;
-		});
-
-		gradeChartData = {
-			grade: createChartData('grade', allCommits),
-			passRate: createChartData('passRate', allCommits),
-			coverage: createChartData('coverage', allCommits),
-			release: dateLineRelease,
-			due: dateLineDue
-		};
-
-		disabledGradeData = $.extend({}, gradeChartData.grade);
-		disabledGradeData.disabled = true;
-
-		emptyChartData = {
-			grade: disabledGradeData,
-			passRate: createChartData('passRate', []),
-			coverage: createChartData('coverage', []),
-			release: dateLineRelease,
-			due: dateLineDue
-		};
-
-		return {
-			userData: userData,
-			usernames: usernames,
-			gradeChartData: gradeChartData,
-			disabledGradeData: disabledGradeData,
-			emptyChartData: emptyChartData,
-			dateLineRelease: dateLineRelease,
-			dateLineDue: dateLineDue
-		};
-	}
-
 	function drawUserCharts(context) {
 		$.each([0,1], function(index) {
 			var userIndex = currentState.users[index];
@@ -360,6 +288,88 @@
 		});
 	}
 
+	function drawSparklineChart(context, done) {
+		drawChart({
+			containerSelector: '#cell'+'-'+context.teamName,
+			margin: {top: 0, right: 0, bottom: 0, left: 0},
+			data: [context.gradeChartData.grade],
+			x: function(point) {
+				return parseFloat(point.grd);
+			},
+			y: function(point) {
+				return point.time;
+			},
+			showYAxis: false,
+			showXAxis: false,
+			tooltip: $.noop,
+			done: done
+		});
+	}
+
+
+	function appendGalleryChartContainer(username, hasFocus) {
+		var containerSelector = '.gallery-chart-container[data-username="'+username+'"]';
+		var $chartContainer = $('<div class="gallery-chart-container" data-username="'+username+'">');
+		var $svg = $('<svg class="gallery-chart"></svg>');
+		if (hasFocus) {
+			$chartContainer.addClass('active');
+		}
+		$chartContainer.append($svg);
+		$('#teamline-gallery').append($chartContainer);
+		return containerSelector;
+	}
+
+	function createChartContext(teamName, deliverableName) {
+		var teamData = globalData.teams[teamName || currentState.teamName];
+		var deliverableObj = globalData.deliverables[deliverableName || currentState.deliverableName];
+		var targetDeliverable = teamData[deliverableName || currentState.deliverableName];
+		var userData = targetDeliverable.users;
+		var usernames = Object.keys(userData).sort();
+		var allCommits = [], gradeChartData, disabledGradeData, emptyChartData;
+		var dateLineRelease = createDateLine('release', deliverableObj.release),
+			dateLineDue = createDateLine('due', deliverableObj.due);
+
+		$.each(usernames, function(index, username) {
+			var userCommits = userData[username].commits;
+			allCommits = allCommits.concat(userCommits);
+		});
+
+		allCommits.sort(function(commit1, commit2) {
+			return commit1.time - commit2.time;
+		});
+
+		gradeChartData = {
+			grade: createChartData('grade', allCommits),
+			passRate: createChartData('passRate', allCommits),
+			coverage: createChartData('coverage', allCommits),
+			release: dateLineRelease,
+			due: dateLineDue
+		};
+
+		disabledGradeData = $.extend({}, gradeChartData.grade);
+		disabledGradeData.disabled = true;
+
+		emptyChartData = {
+			grade: disabledGradeData,
+			passRate: createChartData('passRate', []),
+			coverage: createChartData('coverage', []),
+			release: dateLineRelease,
+			due: dateLineDue
+		};
+
+		return {
+			teamName: teamName,
+			deliverableName: deliverableName,
+			userData: userData,
+			usernames: usernames,
+			gradeChartData: gradeChartData,
+			disabledGradeData: disabledGradeData,
+			emptyChartData: emptyChartData,
+			dateLineRelease: dateLineRelease,
+			dateLineDue: dateLineDue
+		};
+	}
+
 	// Draws a team chart based on the current global state
 	function drawTeamCharts() {
 		var context = createChartContext();
@@ -371,57 +381,81 @@
 	// Creates the overview table
 	// TODO: luminance for table cell background is currently based on random generated numbers!
 	function createOverview() {
-		var count;
-		var background,
-			h = settings.overviewBackground.hue,
-			s = settings.overviewBackground.saturation,
-			l = settings.overviewBackground.luminance;
+		var $overview = $('#teamline-overview');
+		var background = 'white',
+			h = 4,
+			s = 100,
+			l = 50;
 
-		var $tr = $('<tr>'), $td;
-		// Calculate a value 0 <= X <= 50 which is added to the base luminance in settings.overviewBackground
-		// 50% luminance = 100% grade; 100% luminance = 0% grade
-		var getLuminanceDiff = function() {
-			var grade = Math.random() * 100; // TODO
-			return (grade - 100) * (-1);
+		var getLightnessDiff = function(contributionDistribution) {
+			return (contributionDistribution / 2) * 100;
 		};
-		for (count = 1; count < 200; count++) {
-			background = 'hsl('+h+','+s+'%,'+(l+getLuminanceDiff())+'%)';
-			$td = $('<td>').attr('data-teamname', 'team'+count).css({background: background}).text('Team'+count);
-			$tr.append($td);
-			if ($tr.children().length === settings.overviewColumns) {
-				$(select.overview).append($tr);
-				$tr = $('<tr>');
+
+		var teamNamesSorted = Object.keys(globalData.teams).sort(function(team1, team2) {
+			var team1Num = settings.numberRegex.exec(team1)[0];
+			var team2Num = settings.numberRegex.exec(team2)[0];
+			if (team1Num && team2Num) {
+				team1Num = parseInt(team1Num, 10);
+				team2Num = parseInt(team2Num, 10);
+				return team1Num - team2Num;
+			} else {
+				return team1 - team2;
 			}
-		}
+		});
+
+		var drawnSparklineCount = 0;
+		$('#teamline-overview').addClass('drawing');
+		$.each(teamNamesSorted, function(index, teamName) {
+			var $div, upperCaseTeamName, contributionDistribution;
+			var deliverableData = globalData.teams[teamName][currentState.deliverableName];
+			upperCaseTeamName = '';//firstLetterUpperCase(teamName);
+			if (deliverableData) {
+				contributionDistribution = parseFloat(deliverableData.ctbDist);
+				background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
+			}
+
+			$div = $('<div>').addClass('team-cell').attr({'data-teamname': teamName, id: 'cell-'+teamName})
+				.css({background: background}).html('<svg>');
+			$overview.append($div);
+
+			if (deliverableData) {
+				drawSparklineChart(createChartContext(teamName), function() {
+					drawnSparklineCount += 1;
+					if (drawnSparklineCount === Object.keys(globalData.teams).length) {
+						$('#teamline-overview').removeClass('drawing');
+					}
+				});
+			}
+		});
 	}
 
-	function setTeamName() {
+	function setHeading() {
 		var teamName = currentState.teamName;
-		var teamNameUpperCase;
+		var $input = $('#teamline-heading-input');
 		if (teamName) {
-			teamNameUpperCase = teamName.charAt(0).toUpperCase() + teamName.slice(1);
+			teamName = firstLetterUpperCase(teamName);
 		}
-		$('#teamline-team').val(teamNameUpperCase || '');
+		$input.val(teamName || 'Overview').attr('disabled', !teamName);
 	}
 
 	// Called when a deliverable button was clicked
 	function onButtonClick(e) {
-		var $button = $(this);
+		var $button = $(e.target).closest('button');
 		if (!$button.hasClass('active')) {
-			updateState('button', { deliverableName: $(this).data('deliverable') });
+			updateState('button', { deliverableName: $button.data('deliverable') });
 		}
 	}
 
 	// Called when a cell in the overview was clicked
-	function onOverviewTdClick(e) {
-		var $td = $(this);
-		var teamName = $td.attr('data-teamname');
-		updateState('overviewcell', { view: settings.views.team, teamName: teamName });
+	function onOverviewTeamClick(e) {
+		var $cell = $(e.target).closest('.team-cell');
+		var teamName = $cell.attr('data-teamname');
+		updateState('overviewcell', { view: 'team', teamName: teamName, users: [0,1] });
 	}
 
 	function onGalleryItemClick(e) {
+		var $target = $(e.target).closest('.gallery-chart-container');
 		var activeIndexes = [];
-		var $target = $(this);
 		var changeState = true;
 		if (!$target.hasClass('active')) {
 			if ($('.gallery-chart-container.active').length < 2) {
@@ -442,41 +476,50 @@
 	}
 
 	function onTeamChange(e) {
-		var value = $(this).val().toLowerCase();
+		var value = $(e.target).closest('input').val().toLowerCase();
 		if (globalData.teams[value]) {
 			updateState('teamchange', { teamName: value });
 		}
+	}
+
+	function onBackButtonClick(e) {
+		updateState('back', {view: 'overview', teamName: '', users: []});
 	}
 
 	$.getJSON(settings.teamlineDataPath, function(data) {
 		var buttons, bodyHeight = $(document.body).outerHeight();
 		globalData = data;
 		buttons = Object.keys(globalData.deliverables);
-		buttons.push(settings.buttonAllLabel);
-		$(select.container).height(bodyHeight).addClass('visible');
+		$('#teamline').height(bodyHeight).addClass('visible');
 		addButtons(buttons);
-		//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-		updateState('init', { deliverableName: 'd1', view: settings.views.team, teamName: 'team178', users: [0,1] });
+		updateState('init', { deliverableName: 'd1', view: 'overview' }); // show overview on page load
+		// updateState('init', { deliverableName: 'd1', view: 'team', teamName: 'team178', users: [0,1] });
 	});
 
 	$(window).on('teamline.state.updated', function(e) {
-		$(select.container).attr('data-view', currentState.view);
+		$('#teamline').attr('data-view', currentState.view);
 		$('button[data-deliverable="'+currentState.deliverableName+'"]').addClass('active').siblings().removeClass('active');
-		setTeamName();
-		if (currentState.view === settings.views.team) {
-			if (currentState.lastTrigger === 'gallery') {
-				$('.user-chart').html('');
-				drawUserCharts(createChartContext());
-			} else {
+		setHeading();
+		if (currentState.view === 'team') {
+			if (currentState.lastTrigger !== 'gallery') {
 				$('#teamline-gallery, svg').html('');
 				drawTeamCharts();
+			} else {
+				$('.user-chart').html('');
+				drawUserCharts(createChartContext());
 			}
+		} else if (currentState.view === 'overview') {
+			$('#teamline-overview').html('');
+			createOverview();
 		}
 	});
 
-	$(select.buttons).on('click', 'button', onButtonClick);
-	$(select.overview).on('click', 'td', onOverviewTdClick);
-	$(select.container).on('click', '.gallery-chart-container', onGalleryItemClick);
-	$(select.container).on('keyup', '#teamline-team', onTeamChange);
+	$('#teamline')
+		.on('click', '.gallery-chart-container', onGalleryItemClick)
+		.on('click', '#back-button', onBackButtonClick)
+		.on('click', '#teamline-buttons', onButtonClick)
+		.on('click', '#teamline-overview', onOverviewTeamClick)
+		.on('keyup', '#teamline-heading-input', onTeamChange)
+	;
 
 }());
