@@ -110,6 +110,7 @@ contribs = function(head, req) {
 				"pPctNew": 0,
         "sCnt": curr.skipCount,
         "fCnt": curr.failCount,
+        "sha": curr.sha
       }
 
 
