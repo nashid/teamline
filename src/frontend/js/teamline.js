@@ -1,14 +1,9 @@
 (function() {
 
-	// === data ===
-	// deliverables: { d1: { due: ..., release: ... }, ... },
-	// teams: { team1: { d1: {  }, ... } }    }
-	// === deliverable ===
-	// ctbDist: "0.5783", cvgGrd: "97.2800", grd:"99.4560", pGrd: "100.0000", users: {...}
+	// Cache for the global data that we load from the JSON file.
 	var globalData;
 
 	// Global state object and core of the application.
-	// Format: { deliverableName: (names in settings.deliverables), view: (names in settings.view), teamName: (name of team) }
 	// With a global state object we can easily upgrade to use the History API is we want.
 	var currentState;
 
@@ -32,7 +27,7 @@
 			team: {
 				grade: '#162eae',
 				passRate: '#d95f02',
-				coverage: '#7570b3'
+				coverage: '#1b9e77'
 			},
 			user: {
 				grade: 'white', // niu
@@ -44,11 +39,12 @@
 
 	// Handlebars templates
 	var templates = {
-		tooltip: Handlebars.compile($("#tooltip-template").html()),
-		buttons: Handlebars.compile($("#buttons-template").html()),
-		legend: Handlebars.compile($("#legend-template").html())
+		tooltip: Handlebars.compile($('#tooltip-template').html()),
+		buttons: Handlebars.compile($('#buttons-template').html()),
+		legend: Handlebars.compile($('#legend-template').html())
 	};
 
+	// Make the first letter of the given string upper case
 	function firstLetterUpperCase(string) {
 		return string.charAt(0).toUpperCase() + string.slice(1);
 	}
@@ -61,6 +57,7 @@
 		$(window).trigger('teamline.state.updated');
 	}
 
+	// Creates proper chart data based on the given type and options
 	function createChartData(type, commits, options) {
 		var values;
 		options = $.extend({}, options);
@@ -79,6 +76,7 @@
 		};
 	}
 
+	// Creates the data set for a date line. This is used for our deliverable release date and due date lines.
 	function createDateLine(type, date) {
 		return {
 			key: type,
@@ -88,7 +86,8 @@
 		};
 	}
 
-	// Generates the HTML for the tooltips upon hover using Handlebars templating
+	// Global tooptip function that generates the HTML with the Handlebars template based on the given object
+	// environment.
 	function tooltip(object) {
 		var point = object.point;
 		var items = [
@@ -113,7 +112,7 @@
 		return templates.tooltip({ items: items });
 	}
 
-	// Adds the deliverable buttons to the DOM
+	// Adds the menu buttons to the DOM
 	function addButtons(deliverables) {
 		var buttons = [], renderedTemplate;
 		$.each(deliverables, function(index, deliverable) {
@@ -123,6 +122,7 @@
 		$('#teamline-buttons').append(renderedTemplate);
 	}
 
+	// Add a custom legend with the given items to the container specified
 	function addLegend(containerSelector, items) {
 		var $container = $(containerSelector);
 		if (!$container.find('.teamline-legend').length) {
@@ -130,7 +130,9 @@
 		}
 	}
 
-	function drawChart(options) {
+	// Main function to draw a line chart with NVD3. Takes the environment specified in the options argument and
+	// overrides defaults.
+	function drawLineChart(options) {
 		var $container = $(options.containerSelector);
 		var chartSelector = options.containerSelector + ' svg';
 		var $chart = $(chartSelector);
@@ -144,7 +146,7 @@
 		};
 
 		nv.addGraph(function() {
-			var chart = nv.models[options.chartType || 'lineChart']()
+			var chart = nv.models.lineChart()
 				.margin(options.margin || {top: 0, right: 0, bottom: 0, left: 5})
 				.tooltipContent(options.tooltip || tooltip)
 				.x(options.x)
@@ -169,6 +171,10 @@
 			chart.forceX([0, 110]);
 			chart.forceY([deliverable.release-172800000, deliverable.due+103680000]);
 
+			chart.lines.dispatch.on('elementClick', function(e) {
+				//alert("You've clicked on " + e.series.key + " - " + e.point.x);
+			});
+
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
 
 			updateSize(d3obj, chart);
@@ -182,13 +188,14 @@
 		});
 	}
 
+	// Draws the grade chart in the left quarter
 	function drawGradeChart(context) {
 		var containerSelector = '#grade-chart-container';
-		drawChart({
+		drawLineChart({
 			containerSelector: containerSelector,
 			margin: {top: 0, right: 0, bottom: 0, left: 50},
 			data: [context.gradeChartData.coverage, context.gradeChartData.passRate, context.gradeChartData.grade,
-					context.gradeChartData.release, context.gradeChartData.due],
+				context.gradeChartData.release, context.gradeChartData.due],
 			x: function(point) {
 				var options = {
 					passRate: parseFloat(point.pPct),
@@ -212,7 +219,8 @@
 		]);
 	}
 
-	function drawIndividualChart(containerSelector, username, chartData, options) {
+	// Draws an individual chart for a user. Used for the two charts on the right.
+	function drawIndividualChart(containerSelector, chartData, options) {
 		var defaults = {
 			containerSelector: containerSelector,
 			data: [chartData.coverage, chartData.passRate, chartData.grade,
@@ -233,20 +241,21 @@
 			xTickPadding: -15,
 			yTickPadding: 5
 		};
-		drawChart($.extend(defaults, options));
+		drawLineChart($.extend(defaults, options));
 	}
 
+	// Draws the two user charts on the right
 	function drawUserCharts(context) {
 		$.each([0,1], function(index) {
 			var userIndex = currentState.users[index];
 			var containerSelector = '#user-chart-'+(index+1)+'-container';
 			var username, userCommits;
 			if (userIndex === undefined) {
-				drawIndividualChart(containerSelector, '', context.emptyChartData);
+				drawIndividualChart(containerSelector, context.emptyChartData);
 			} else {
 				username = context.usernames[userIndex];
 				userCommits = context.userData[username].commits;
-				drawIndividualChart(containerSelector, username, {
+				drawIndividualChart(containerSelector, {
 					grade: context.disabledGradeData,
 					passRate: createChartData('passRate', userCommits, { username: username }),
 					coverage: createChartData('coverage', userCommits, { username: username }),
@@ -265,6 +274,7 @@
 		});
 	}
 
+	// Draws the small charts in the bottom gallery.
 	function drawGalleryCharts(context) {
 		$.each(context.usernames, function(index, username) {
 			var userCommits = context.userData[username].commits;
@@ -280,7 +290,7 @@
 			};
 			var $usernameContainer = $('<div class="username-container">').html(username);
 			$(galleryContainerSelector).append($usernameContainer);
-			drawIndividualChart(galleryContainerSelector, username, chartData, {
+			drawIndividualChart(galleryContainerSelector, chartData, {
 				showYAxis: false,
 				showXAxis: false,
 				tooltip: $.noop
@@ -288,10 +298,10 @@
 		});
 	}
 
+	// Draws a sparkline chart. Used for the overview cells.
 	function drawSparklineChart(context, done) {
 		var data = [];
 		var width = 50, height = 50;
-		var deliverable = globalData.deliverables[currentState.deliverableName];
 		var finalGrade = parseFloat(context.deliverableTeamResult.grd);
 		$.each(context.gradeChartData.grade.values, function(index, point) {
 			data.push({x: parseFloat(point.grd), y: point.time});
@@ -311,7 +321,7 @@
 		});
 	}
 
-
+	// Adds a container in the gallery for a gallery chart
 	function appendGalleryChartContainer(username, hasFocus) {
 		var containerSelector = '.gallery-chart-container[data-username="'+username+'"]';
 		var $chartContainer = $('<div class="gallery-chart-container" data-username="'+username+'">');
@@ -324,6 +334,7 @@
 		return containerSelector;
 	}
 
+	// Create a context object that establishes the environment for drawing a chart
 	function createChartContext(teamName, deliverableName) {
 		var teamData = globalData.teams[teamName || currentState.teamName];
 		var deliverableObj = globalData.deliverables[deliverableName || currentState.deliverableName];
@@ -376,7 +387,7 @@
 		};
 	}
 
-	// Draws a team chart based on the current global state
+	// Draw all the charts in the team view
 	function drawTeamCharts() {
 		var context = createChartContext();
 		drawGradeChart(context);
@@ -384,11 +395,13 @@
 		drawUserCharts(context);
 	}
 
-	// Creates the overview table
+	// Creates the overview content for the given deliverable. This should only be called if the overview
+	// wasn't created before.
 	function createOverview(deliverableName) {
 		var $overview = $('#teamline-overview');
 		var $deliverableOverview = $('<div>').attr('id', 'overview-'+deliverableName).addClass('deliverable-overview');
 		$overview.append($deliverableOverview);
+		$deliverableOverview.addClass('active');
 
 		var background = 'white',
 			h = 31,
@@ -411,10 +424,18 @@
 			}
 		});
 
+		var updateCellSize = function($container, $div) {
+			var containerWidth = $container.outerWidth();
+			var cellWidth = $div.outerWidth();
+			var cellsInRow = Math.floor(containerWidth / cellWidth);
+			var newWidthAndHeight = containerWidth / cellsInRow;
+			$div.css({width: newWidthAndHeight, height: newWidthAndHeight});
+		};
+
 		$.each(teamNamesSorted, function(index, teamName) {
 			var $div, upperCaseTeamName, contributionDistribution;
 			var deliverableData = globalData.teams[teamName][deliverableName];
-			upperCaseTeamName = '';//firstLetterUpperCase(teamName);
+			upperCaseTeamName = firstLetterUpperCase(teamName);
 			if (deliverableData) {
 				contributionDistribution = parseFloat(deliverableData.ctbDist);
 				background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
@@ -422,8 +443,10 @@
 
 			$div = $('<div>').addClass('team-cell')
 				.attr({'data-teamname': teamName, id: 'cell-'+deliverableName+'-'+teamName})
-				.css({background: background}).html('<svg>');
+				.css({background: background}).html('<svg></svg><span class="teamname">'+upperCaseTeamName+'</span>');
 			$deliverableOverview.append($div);
+
+			updateCellSize($deliverableOverview, $div);
 
 			if (deliverableData) {
 				drawSparklineChart(createChartContext(teamName, deliverableName));
@@ -431,6 +454,7 @@
 		});
 	}
 
+	// Sets the contents of the heading in the menu
 	function setHeading() {
 		var teamName = currentState.teamName;
 		var $input = $('#teamline-heading-input');
@@ -455,6 +479,7 @@
 		updateState('overviewcell', { view: 'team', teamName: teamName, users: [0,1] });
 	}
 
+	// Called when a gallery chart was clicked
 	function onGalleryItemClick(e) {
 		var $target = $(e.target).closest('.gallery-chart-container');
 		var activeIndexes = [];
@@ -477,6 +502,7 @@
 		}
 	}
 
+	// Called when the team name in the heading was changed
 	function onTeamChange(e) {
 		var value = $(e.target).closest('input').val().toLowerCase();
 		if (globalData.teams[value]) {
@@ -484,20 +510,22 @@
 		}
 	}
 
+	// Called when the back button was clicked
 	function onBackButtonClick(e) {
 		updateState('back', {view: 'overview', teamName: '', users: []});
 	}
 
+	// Show the overview for the current deliverable. Create its contents if that didn't happen before.
 	function showOverview() {
 		var deliverableName = currentState.deliverableName;
 		var selector = '#overview-'+deliverableName;
-		var $deliverableOverview = $(selector);
-		if (!$deliverableOverview.length) {
+		if (!$(selector).length) {
 			createOverview(deliverableName);
 		}
-		$deliverableOverview = $(selector).addClass('active').siblings().removeClass('active');
+		$(selector).addClass('active').siblings().removeClass('active');
 	}
 
+	// Fetch our JSON data and initialize the whole thing
 	$.getJSON(settings.teamlineDataPath, function(data) {
 		var buttons, bodyHeight = $(document.body).outerHeight();
 		globalData = data;
@@ -505,9 +533,9 @@
 		$('#teamline').height(bodyHeight).addClass('visible');
 		addButtons(buttons);
 		updateState('init', { deliverableName: 'd1', view: 'overview' }); // show overview on page load
-		// updateState('init', { deliverableName: 'd1', view: 'team', teamName: 'team178', users: [0,1] });
 	});
 
+	// Main listener called whenever our global state changes
 	$(window).on('teamline.state.updated', function(e) {
 		$('#teamline').attr('data-view', currentState.view);
 		$('button[data-deliverable="'+currentState.deliverableName+'"]').addClass('active').siblings().removeClass('active');
@@ -525,6 +553,7 @@
 		}
 	});
 
+	// Adds all the listeners we need for interaction
 	$('#teamline')
 		.on('click', '.gallery-chart-container', onGalleryItemClick)
 		.on('click', '#back-button', onBackButtonClick)
