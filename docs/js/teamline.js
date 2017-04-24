@@ -260,14 +260,16 @@
 				drawIndividualChart(containerSelector, context.emptyChartData);
 			} else {
 				username = context.usernames[userIndex];
-				userCommits = context.userData[username].commits;
-				drawIndividualChart(containerSelector, {
-					grade: context.disabledGradeData,
-					passRate: createChartData('passRate', userCommits, { username: username }),
-					coverage: createChartData('coverage', userCommits, { username: username }),
-					due: context.dateLineDue,
-					release: context.dateLineRelease
-				});
+				if (context.userData[username]) {
+					userCommits = context.userData[username].commits;
+					drawIndividualChart(containerSelector, {
+						grade: context.disabledGradeData,
+						passRate: createChartData('passRate', userCommits, { username: username }),
+						coverage: createChartData('coverage', userCommits, { username: username }),
+						due: context.dateLineDue,
+						release: context.dateLineRelease
+					});
+				}
 			}
 			$(containerSelector).find('.username-container').html(username || '');
 
@@ -441,21 +443,23 @@
 		$.each(teamNamesSorted, function(index, teamName) {
 			var $div, upperCaseTeamName, contributionDistribution;
 			var deliverableData = globalData.teams[teamName][deliverableName];
-			upperCaseTeamName = firstLetterUpperCase(teamName);
 			if (deliverableData) {
-				contributionDistribution = parseFloat(deliverableData.ctbDist);
-				background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
-			}
+				upperCaseTeamName = firstLetterUpperCase(teamName);
+				if (deliverableData) {
+					contributionDistribution = parseFloat(deliverableData.ctbDist);
+					background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
+				}
 
-			$div = $('<div>').addClass('team-cell')
-				.attr({'data-teamname': teamName, id: 'cell-'+deliverableName+'-'+teamName})
-				.css({background: background}).html('<svg></svg><span class="teamname">'+upperCaseTeamName+'</span>');
-			$deliverableOverview.append($div);
+				$div = $('<div>').addClass('team-cell')
+					.attr({'data-teamname': teamName, id: 'cell-'+deliverableName+'-'+teamName})
+					.css({background: background}).html('<svg></svg><span class="teamname">'+upperCaseTeamName+'</span>');
+				$deliverableOverview.append($div);
 
-			updateCellSize($deliverableOverview, $div);
+				updateCellSize($deliverableOverview, $div);
 
-			if (deliverableData) {
-				drawSparklineChart(createChartContext(teamName, deliverableName));
+				if (deliverableData) {
+					drawSparklineChart(createChartContext(teamName, deliverableName));
+				}
 			}
 		});
 	}
