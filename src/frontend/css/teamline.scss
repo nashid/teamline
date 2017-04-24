@@ -4,7 +4,7 @@ $grey_border: 3px solid #ccc;
   position: relative;
   display: none;
   width: 100%;
-  background: #fcf8e3;
+  background: white;
 
   ul {
     padding: 0;
@@ -45,15 +45,22 @@ $grey_border: 3px solid #ccc;
 }
 
 #teamline-overview {
-  padding-bottom: 20px;
 
-  > div {
+  .deliverable-overview {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
+  .team-cell {
     display: inline-block;
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     padding: 10px;
     text-align: center;
     border: 1px solid #ccc;
+    overflow: hidden;
     color: #444;
     &:hover {
       background-color: #aaa !important;
@@ -63,7 +70,7 @@ $grey_border: 3px solid #ccc;
   }
 
   &.drawing svg {
-    display: none;
+    //display: none;
   }
 }
 

@@ -30,7 +30,7 @@
 		},
 		colors: {
 			team: {
-				grade: '#1b9e77',
+				grade: '#162eae',
 				passRate: '#d95f02',
 				coverage: '#7570b3'
 			},
@@ -144,7 +144,7 @@
 		};
 
 		nv.addGraph(function() {
-			var chart = nv.models.lineChart()
+			var chart = nv.models[options.chartType || 'lineChart']()
 				.margin(options.margin || {top: 0, right: 0, bottom: 0, left: 5})
 				.tooltipContent(options.tooltip || tooltip)
 				.x(options.x)
@@ -289,20 +289,25 @@
 	}
 
 	function drawSparklineChart(context, done) {
-		drawChart({
-			containerSelector: '#cell'+'-'+context.teamName,
-			margin: {top: 0, right: 0, bottom: 0, left: 0},
-			data: [context.gradeChartData.grade],
-			x: function(point) {
-				return parseFloat(point.grd);
-			},
-			y: function(point) {
-				return point.time;
-			},
-			showYAxis: false,
-			showXAxis: false,
-			tooltip: $.noop,
-			done: done
+		var data = [];
+		var width = 50, height = 50;
+		var deliverable = globalData.deliverables[currentState.deliverableName];
+		var finalGrade = parseFloat(context.deliverableTeamResult.grd);
+		$.each(context.gradeChartData.grade.values, function(index, point) {
+			data.push({x: parseFloat(point.grd), y: point.time});
+		});
+		nv.addGraph(function() {
+			var chart = nv.models.sparkline()
+				.width(width)
+				.height(height)
+				.margin({top: 3, right: 3, bottom: 3, left: 3})
+				.xRange([0, (finalGrade / 100) * width])
+				.color([settings.colors.team.grade]);
+			d3.select('#cell'+'-'+context.deliverableName+'-'+context.teamName+' svg')
+				.datum(data)
+				.call(chart);
+
+			done && done();
 		});
 	}
 
@@ -322,8 +327,8 @@
 	function createChartContext(teamName, deliverableName) {
 		var teamData = globalData.teams[teamName || currentState.teamName];
 		var deliverableObj = globalData.deliverables[deliverableName || currentState.deliverableName];
-		var targetDeliverable = teamData[deliverableName || currentState.deliverableName];
-		var userData = targetDeliverable.users;
+		var deliverableTeamResult = teamData[deliverableName || currentState.deliverableName];
+		var userData = deliverableTeamResult.users;
 		var usernames = Object.keys(userData).sort();
 		var allCommits = [], gradeChartData, disabledGradeData, emptyChartData;
 		var dateLineRelease = createDateLine('release', deliverableObj.release),
@@ -359,6 +364,7 @@
 
 		return {
 			teamName: teamName,
+			deliverableTeamResult: deliverableTeamResult,
 			deliverableName: deliverableName,
 			userData: userData,
 			usernames: usernames,
@@ -379,11 +385,13 @@
 	}
 
 	// Creates the overview table
-	// TODO: luminance for table cell background is currently based on random generated numbers!
-	function createOverview() {
+	function createOverview(deliverableName) {
 		var $overview = $('#teamline-overview');
+		var $deliverableOverview = $('<div>').attr('id', 'overview-'+deliverableName).addClass('deliverable-overview');
+		$overview.append($deliverableOverview);
+
 		var background = 'white',
-			h = 4,
+			h = 31,
 			s = 100,
 			l = 50;
 
@@ -403,28 +411,22 @@
 			}
 		});
 
-		var drawnSparklineCount = 0;
-		$('#teamline-overview').addClass('drawing');
 		$.each(teamNamesSorted, function(index, teamName) {
 			var $div, upperCaseTeamName, contributionDistribution;
-			var deliverableData = globalData.teams[teamName][currentState.deliverableName];
+			var deliverableData = globalData.teams[teamName][deliverableName];
 			upperCaseTeamName = '';//firstLetterUpperCase(teamName);
 			if (deliverableData) {
 				contributionDistribution = parseFloat(deliverableData.ctbDist);
 				background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
 			}
 
-			$div = $('<div>').addClass('team-cell').attr({'data-teamname': teamName, id: 'cell-'+teamName})
+			$div = $('<div>').addClass('team-cell')
+				.attr({'data-teamname': teamName, id: 'cell-'+deliverableName+'-'+teamName})
 				.css({background: background}).html('<svg>');
-			$overview.append($div);
+			$deliverableOverview.append($div);
 
 			if (deliverableData) {
-				drawSparklineChart(createChartContext(teamName), function() {
-					drawnSparklineCount += 1;
-					if (drawnSparklineCount === Object.keys(globalData.teams).length) {
-						$('#teamline-overview').removeClass('drawing');
-					}
-				});
+				drawSparklineChart(createChartContext(teamName, deliverableName));
 			}
 		});
 	}
@@ -486,6 +488,16 @@
 		updateState('back', {view: 'overview', teamName: '', users: []});
 	}
 
+	function showOverview() {
+		var deliverableName = currentState.deliverableName;
+		var selector = '#overview-'+deliverableName;
+		var $deliverableOverview = $(selector);
+		if (!$deliverableOverview.length) {
+			createOverview(deliverableName);
+		}
+		$deliverableOverview = $(selector).addClass('active').siblings().removeClass('active');
+	}
+
 	$.getJSON(settings.teamlineDataPath, function(data) {
 		var buttons, bodyHeight = $(document.body).outerHeight();
 		globalData = data;
@@ -502,15 +514,14 @@
 		setHeading();
 		if (currentState.view === 'team') {
 			if (currentState.lastTrigger !== 'gallery') {
-				$('#teamline-gallery, svg').html('');
+				$('#teamline-gallery, #teamline-charts svg').html('');
 				drawTeamCharts();
 			} else {
 				$('.user-chart').html('');
 				drawUserCharts(createChartContext());
 			}
 		} else if (currentState.view === 'overview') {
-			$('#teamline-overview').html('');
-			createOverview();
+			showOverview();
 		}
 	});
 
