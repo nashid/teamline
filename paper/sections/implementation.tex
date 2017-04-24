@@ -1,5 +1,7 @@
 \documentclass[../manifest.tex]{subfiles}
 
+% - medium-level implementation description. you must include specifics of what you did yourself versus what other components/libraries/toolkits you built upon. this section is one major divergence from standard research paper format, you need to provide much more detail than would normally be appropriate in a research context. see this good example. teams of two or more people should include a breakdown of who did what work, as in this good example.
+
 \begin{document}
 Implementation
 
@@ -7,7 +9,7 @@ The work was divided as: ...
 We used the libraries: ...
 
 \subsection{Data Transformation}
-Teamline uses data captured in a CouchDB noSQL database during the 2016 winter 2 term for the CPSC310 course project. We made a copy of this database after the project was complete and deployed the copy on a personal server. The database is over 14 GB and contains approximately 45,000 commit records which contain details about the committed code including the pass rate against the instructor written tests and the percentage of code the team covered with their own tests. The fields relevant to Teamline are specified in table ***. These fields are extracted from the database using a map-reduce view whose code is available in \texttt{contribs-by-team.js}. The view emits a list of commits which can be optionally filtered by team, deliverable and timestamp. On top of this view, we implemented a list function whose code is available in \texttt{contrib.js} that takes as input the filtered list of commits and outputs a list of team objects: aggregates of all the commits made by the members of the team. A complete description of the fields emitted by the list function can be found in \texttt{data-guide.md}. The most challenging part of transforming the data was to define a metrics for contribution.
+Teamline uses data captured in a CouchDB noSQL database during the 2016 winter 2 term for the CPSC310 course project. We made a copy of this database after the project was complete and deployed the copy on a personal server. The database is over 14 GB and contains approximately 44,000 commit records which contain details about the committed code including the pass rate against the instructor written tests and the percentage of code the team covered with their own tests. These fields are extracted from the database using a map-reduce view whose code is available in \texttt{contribs-by-team.js}. The view emits a list of commit records which can be optionally filtered by team, deliverable and timestamp. On top of this view, we implemented a list function whose code is available in \texttt{contrib.js} that takes as input the filtered list of commits and outputs a list of team objects: aggregates of all the commits made by the members of the team. It also computes the contribution metrics discussed in section \ref{ssec:data-description}. A complete description of the fields emitted by the list function can be found in \texttt{data-guide.md}.
 
 \subsection{Overview View}
 \subsection{Detail View}

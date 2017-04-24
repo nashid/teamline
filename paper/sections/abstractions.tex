@@ -1,5 +1,17 @@
 \documentclass[../manifest.tex]{subfiles}
 
+% - you should analyze your domain problem according to the framework of the book, translating from domain language into abstract descriptions of both tasks and data
+% - typically data will need to come first, since you will need to refer to that data in your task descriptions.
+% - it is very likely that you will need to first have domain-specific descriptions, followed by the abstracted versions.
+% - it is often helpful to split these sections into two pieces: first have subsection where data is described in domain-specific terms, and then follow up with a next subsection where you've abstracted into domain-independent language. you may choose to have a separate Domain Background section before this one if there's a lot of specialized vocabulary/material to explain in order to have a comprehensible and concise data description.
+% - similarly, it can be easier to write the tasks section by first providing a domain-specific list of tasks, and then present the abstracted version.
+% - you should decide whether to split by domain vs abstract (first have both data and task domain-specific sections, followed by the abstractions for data and task) or to split by data/task (first have data domain-specific then data abstract, then have task domain-specific and finally task abstract).
+
+
+
+
+
+
 \begin{document}
 \subsection{Domain Background}
 Our tool visualizes data collected by AutoTest\footnote{http://github.com/nickbradley/autotest},
@@ -15,27 +27,8 @@ automatically invoked and runs a suite of instructor-written tests against the m
 code. Results are stored in a NoSQL database with each record corresponding to a
 single submission (push event).
 
-After a submission deadline, TAs meet with their assigned
-teams to conduct a retrospective to discuss any challenges that arose
-during the sprint and to ensure that the work was equitably distributed among the
-team members. This typically consists of a TA asking some questions designed to
-gauge a student's comprehension of the task and code. They may go so far as to
-explicitly and privately ask each student how evenly they felt the workload was
-split. Based on the retrospective, the TAs assign a scaling factor to the deliverable grade. For example, if
-the team got 90\% on the deliverable but one member did most of the work, the final
-grades might be 90\%*1.0 = 90\% and 90\%*0.6 = 54\%. Unfortunately, it can be hard
-to determine how much work was done by each student from these conversations since
-the team member who contributed very little will attempt to spoof the TA while the
-hard-working one may not want to rat out their partner. One possible solution is
-to look at the commit history on GitHub to determine how many commits each student
-made. This can be a decent proxy but can be misleading since different people have
-different commit habits (some will commit every line, others only large changes)
-and they may not reflect the actual contribution to the grade (i.e. commits that
-don't directly increase the grade).
 
-
-
-\subsection{Data Description}
+\subsection{Data Description} \label{ssec:data-description}
 Our grade dataset mentioned earlier is treated as a static table which contains over 44,000 submission records for 285 students in 139 teams. From this dataset we use the attributes shown in table \ref{tab:attributes}. From those attributes we created the following derived attributes:
 
 \textbf{Pass rate contribution.} A student's commit is considered as contributing to the team's test pass percentage if one or more tests are passed for the first time with this commit. The contribution calculated as the number of passing for the first time divided by the total number of tests passed by the team. We do not visualize this value value directly. Instead, we visualize the accumulated value over all commits to ensure that the plotted points are monotonic. This is a quantitative attribute ranging from 0-100\%.
@@ -65,7 +58,7 @@ Our grade dataset mentioned earlier is treated as a static table which contains 
     coverage  & Quantitative & Percentage of student code executed by student-written tests. \\
     grade     & Quantitative & Computed as 80\% pass rate + 20\% coverage. \\
     timestamp      & Sequential   & Unix time of record creation. \\
-    commitID      & Categorical  & The (partial) SHA-1 hash of the submitted commit. \\
+    commitID      & Categorical  & The (truncated) SHA-1 hash of the submitted commit. \\
     githubID      & Categorical\tnote{a}  & The GitHub ID of the student making the submission. \\
     team           & Categorical\tnote{b}  & The team number, stored as \textit{teamXXX}, where \textit{XXX} is a number between 2 and 199. \\
     deliverable    & Sequential   & The submission deliverable, which can have values \textit{d1}, \textit{d2}, or \textit{d3}. \\
@@ -80,4 +73,28 @@ Our grade dataset mentioned earlier is treated as a static table which contains 
 
 
 \subsection{Task Description}
+%% Describe the task -- maybe just a couple of paragraphs single
+
+After a submission deadline, TAs meet with their assigned
+teams to conduct a retrospective to discuss any challenges that arose
+during the sprint and to ensure that the work was equitably distributed among the
+team members. This typically consists of a TA asking some questions designed to
+gauge a student's comprehension of the task and code. They may go so far as to
+explicitly and privately ask each student how evenly they felt the workload was
+split. Based on the retrospective, the TAs assign a scaling factor to the deliverable grade. For example, if
+the team got 90\% on the deliverable but one member did most of the work, the final
+grades might be 90\%*1.0 = 90\% and 90\%*0.6 = 54\%. Unfortunately, it can be hard
+to determine how much work was done by each student from these conversations since
+the team member who contributed very little will attempt to spoof the TA while the
+hard-working one may not want to rat out their partner. One possible solution is
+to look at the commit history on GitHub to determine how many commits each student
+made. This can be a decent proxy but can be misleading since different people have
+different commit habits (some will commit every line, others only large changes)
+and they may not reflect the actual contribution to the grade (i.e. commits that
+don't directly increase the grade).
+
+
+
+Users of Teamline are able to accomplish two major tasks. The first is to present the contributions made by each member of the team to the user for inspection. The second is to provide a visual summary of the commit history of each member of the team.
+
 \end{document}
