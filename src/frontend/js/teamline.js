@@ -9,7 +9,7 @@
 
 	// Configuration settings
 	var settings = {
-		teamlineDataPath: 'teamline-data-mini.json',
+		teamlineDataPath: 'teamline-data-min.json',
 		numberRegex: /\d+/,
 		labels: {
 			team: {
