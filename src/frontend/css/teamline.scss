@@ -23,7 +23,7 @@ $grey_border_thin: 1px solid #ccc;
   }
 
   &[data-view="team"] {
-    #teamline-overview {
+    #teamline-overview, #overview-legend {
       display: none;
     }
   }
@@ -103,6 +103,31 @@ $grey_border_thin: 1px solid #ccc;
   vertical-align: middle;
   font-size: 25px;
   margin-right: 50px;
+}
+
+#overview-legend {
+  margin-left: 30px;
+
+  span {
+    display: inline-block;
+    vertical-align: middle;
+
+    &.text {
+      width: 30px;
+      line-height: 15px;
+      font-size: 16px;
+      width: 60px;
+    }
+    &.gradient {
+      margin-right: 5px;
+      background: black;
+      width: 100px;
+      height: 25px;
+      background: linear-gradient(to right, hsl(31, 100%, 50%), hsl(31, 100%, 100%));
+    }
+
+  }
+
 }
 
 #teamline-heading-input {
