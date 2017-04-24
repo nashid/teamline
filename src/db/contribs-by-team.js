@@ -6,6 +6,7 @@ x = function(doc) {
     emit([doc.team, doc.deliverable, doc.timestamp], {
       "team": doc.team,
       "user": doc.committer,
+      "sha": doc.commit,
       "deliverable": doc.deliverable,
       "testGrade": tGrade.toFixed(4),
       "coverGrade": cGrade.toFixed(4),
