@@ -1,4 +1,5 @@
 $grey_border: 3px solid #ccc;
+$grey_border_thin: 1px solid #ccc;
 
 #teamline {
   position: relative;
@@ -45,6 +46,9 @@ $grey_border: 3px solid #ccc;
 }
 
 #teamline-overview {
+  border-left: $grey_border;
+  border-right: $grey_border;
+  border-bottom: $grey_border;
 
   .deliverable-overview {
     display: none;
@@ -54,6 +58,7 @@ $grey_border: 3px solid #ccc;
   }
 
   .team-cell {
+    position: relative;
     display: inline-block;
     width: 80px;
     height: 80px;
@@ -66,6 +71,14 @@ $grey_border: 3px solid #ccc;
       background-color: #aaa !important;
       color: white;
       cursor: pointer;
+    }
+
+    .teamname {
+      padding: 0 5px;
+      right: 0;
+      bottom: 0;
+      position: absolute;
+      color: #555;
     }
   }
 

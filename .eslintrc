@@ -1,0 +1,23 @@
+{
+  "extends": "eslint:recommended",
+  "rules": {
+    "indent": ["error", "tab", { "SwitchCase": 1 }],
+    "no-unused-vars": ["error", { "args": "none" }],
+    "no-console": 0,
+    "eqeqeq": 2,
+    "quotes": ["error", "single"],
+    "no-bitwise": 2,
+    "camelcase": 2,
+    "curly": 2
+  },
+  "globals": {
+    "console": true,
+    "window": true,
+    "document": true,
+    "$": true,
+    "moment": true,
+    "d3": true,
+    "nv": true,
+    "Handlebars": true
+  }
+}
