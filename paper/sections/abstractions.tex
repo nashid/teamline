@@ -14,7 +14,7 @@
 
 \begin{document}
 \subsection{Domain Background}
-Our tool visualizes data collected by AutoTest\footnote{http://github.com/nickbradley/autotest},
+Our tool uses data collected by AutoTest\footnote{http://github.com/nickbradley/autotest},
 an automatic grading service used to grade code submissions for students in
 CPSC310. The course is structured around a term-long coding project that is
 divided into 5 deliverables (or sprints) completed by teams consisting of 2-3 students.
@@ -24,24 +24,24 @@ using a basic git workflow: students pull the latest code changes from GitHub,
 commit their modified code locally and then push those commits to GitHub for
 other members to see. Every time a student pushes their changes, AutoTest is
 automatically invoked and runs a suite of instructor-written tests against the modified
-code. Results are stored in a NoSQL database with each record corresponding to a
+code. In addition, it computes the amount of code covered by student-written tests. Results are stored in a NoSQL database with each record corresponding to a
 single submission (push event).
 
 
 \subsection{Data Description} \label{ssec:data-description}
-Our grade dataset mentioned earlier is treated as a static table which contains over 44,000 submission records for 285 students in 139 teams. From this dataset we use the attributes shown in table \ref{tab:attributes}. From those attributes we created the following derived attributes:
+The grade dataset is treated as a static table which contains over 44,000 submission records for 285 students in 139 teams. From this dataset we use the attributes shown in table \ref{tab:attributes}. From those attributes we created the following derived attributes:
 
-\textbf{Pass rate contribution.} A student's commit is considered as contributing to the team's test pass percentage if one or more tests are passed for the first time with this commit. The contribution calculated as the number of passing for the first time divided by the total number of tests passed by the team. We do not visualize this value value directly. Instead, we visualize the accumulated value over all commits to ensure that the plotted points are monotonic. This is a quantitative attribute ranging from 0-100\%.
+\textbf{Pass rate contribution.} A student's commit is considered as contributing to the team's pass rate if one or more instructor-written tests are passed for the first time in this commit. The contribution is calculated as the number of tests passing for the first time divided by the total number of tests passed by the team. We do not visualize this value value directly. Instead, we visualize the accumulated value over all commits to ensure that the plotted points are monotonic. This is a quantitative attribute ranging from 0-100\%.
 
 \textbf{Coverage contribution.} We consider a contribution to the coverage grade to occur when a commit increases the coverage grade beyond anything seen so far. The amount of the  contribution is the amount by which which it exceeds the running maximum. Again, we accumulate this value to ensure a monotonic line. Note that the coverage is increased when a student writes (more) tests that execute a higher proportion of their code or they change the total lines of code. This is a quantitative attribute ranging from 0-100\%.
 
-\textbf{Overall contribution.} The overall contribution is computed as the sum of 80\% pass rate contribution and 20\% coverage contribution to match the weighting used in computing the deliverable grade. This attribute is quantitative and ranges between 0 and 100\%.
+\textbf{Overall contribution.} The overall contribution is computed as the sum of 80\% pass rate contribution and 20\% coverage contribution to match the weights used in computing the deliverable grade. This attribute is quantitative and ranges between 0 and 100\%.
 
-\textbf{Within team contribution uniformity (CU).} This measures how evenly the team members contributed. It is a quantitative attribute that ranges from 0 to 1 where 0 indicates that one team member did all the work while 1 indicates completely uniform workload split (each member contributed equally). This attribute is computed by taking the sorted pairwise difference of the overall contribution (computed as 80\% test grade contribution and 20\% coverage grade contribution) of each team member. More specifically, if $m$ is the number of team members and $u_i$ is the overall contribution for the $i$th team member (sorted by overall contribution), then we have
+\textbf{Within-team contribution uniformity (CU).} This measures how evenly the team members contributed. It is a quantitative attribute that ranges from 0 to 1 where 0 indicates that one team member did all the work while 1 indicates a completely uniform workload split (each member contributed equally). This attribute is computed by taking the sorted pairwise difference of the overall contribution (computed as 80\% test grade contribution and 20\% coverage grade contribution) of each team member. More specifically, if $m$ is the number of team members and $u_i$ is the overall contribution for the $i$th team member (sorted by overall contribution), then we have
 
 \begin{equation}
   \label{eq:con-uniform}
-  CU = \sum_{i=1}^{m-1} |u_i - u_{i+1}|.
+  CU = 1-\sum_{i=1}^{m-1} |u_i - u_{i+1}|.
 \end{equation}
 
 
@@ -73,8 +73,6 @@ Our grade dataset mentioned earlier is treated as a static table which contains 
 
 
 \subsection{Task Description}
-%% Describe the task -- maybe just a couple of paragraphs single
-
 After a submission deadline, TAs meet with their assigned
 teams to conduct a retrospective to discuss any challenges that arose
 during the sprint and to ensure that the work was equitably distributed among the
@@ -93,8 +91,6 @@ different commit habits (some will commit every line, others only large changes)
 and they may not reflect the actual contribution to the grade (i.e. commits that
 don't directly increase the grade).
 
-
-
-Users of Teamline are able to accomplish two major tasks. The first is to present the contributions made by each member of the team to the user for inspection. The second is to provide a visual summary of the commit history of each member of the team.
+From the description, we can identify two distinct tasks that a TA is expected to perform. The first is to understand the uniformity of the contributions. To support this task the visualization needs to present the contributions to the user in a way that makes it apparent if contributions of one person where much larger or much smaller than the others. The second task is to summarize the commit history of the team. We discuss how Teamline line enables these tasks in the next section.
 
 \end{document}
