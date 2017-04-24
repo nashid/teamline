@@ -44,6 +44,11 @@
 		legend: Handlebars.compile($('#legend-template').html())
 	};
 
+	function openGithubCommit(teamName, commitSha) {
+		var url = 'https://github.com/CS310-2017Jan/cpsc310project_'+teamName+'/commit/'+commitSha;
+		window.open(url);
+	}
+
 	// Make the first letter of the given string upper case
 	function firstLetterUpperCase(string) {
 		return string.charAt(0).toUpperCase() + string.slice(1);
@@ -172,7 +177,8 @@
 			chart.forceY([deliverable.release-172800000, deliverable.due+103680000]);
 
 			chart.lines.dispatch.on('elementClick', function(e) {
-				//alert("You've clicked on " + e.series.key + " - " + e.point.x);
+				var point = e.point;
+				openGithubCommit(currentState.teamName, point.sha);
 			});
 
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
@@ -510,6 +516,11 @@
 		}
 	}
 
+	function onTeamInputBlur(e) {
+		var teamName = firstLetterUpperCase(currentState.teamName);
+		$(e.target).val(teamName);
+	}
+
 	// Called when the back button was clicked
 	function onBackButtonClick(e) {
 		updateState('back', {view: 'overview', teamName: '', users: []});
@@ -560,6 +571,7 @@
 		.on('click', '#teamline-buttons', onButtonClick)
 		.on('click', '#teamline-overview', onOverviewTeamClick)
 		.on('keyup', '#teamline-heading-input', onTeamChange)
+		.on('blur', '#teamline-heading-input', onTeamInputBlur);
 	;
 
 }());
