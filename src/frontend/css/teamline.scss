@@ -94,13 +94,13 @@ $grey_border_thin: 1px solid #ccc;
   border-bottom: $grey_border;
 
   > * {
+    vertical-align: middle;
     display: inline-block;
   }
 }
 
 #teamline-logo {
   font-weight: bold;
-  vertical-align: middle;
   font-size: 25px;
   margin-right: 50px;
 }
@@ -131,7 +131,6 @@ $grey_border_thin: 1px solid #ccc;
 }
 
 #teamline-heading-input {
-  vertical-align: middle;
   padding: 0 6px;
   font-size: 22px;
   margin: 0 10px;
