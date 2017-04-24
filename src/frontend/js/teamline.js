@@ -44,6 +44,11 @@
 		legend: Handlebars.compile($('#legend-template').html())
 	};
 
+	function openGithubCommit(teamName, commitSha) {
+		var url = 'https://github.com/CS310-2017Jan/cpsc310project_'+teamName+'/commit/'+commitSha;
+		window.open(url);
+	}
+
 	// Make the first letter of the given string upper case
 	function firstLetterUpperCase(string) {
 		return string.charAt(0).toUpperCase() + string.slice(1);
@@ -172,7 +177,8 @@
 			chart.forceY([deliverable.release-172800000, deliverable.due+103680000]);
 
 			chart.lines.dispatch.on('elementClick', function(e) {
-				//alert("You've clicked on " + e.series.key + " - " + e.point.x);
+				var point = e.point;
+				openGithubCommit(currentState.teamName, point.sha);
 			});
 
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
@@ -254,14 +260,16 @@
 				drawIndividualChart(containerSelector, context.emptyChartData);
 			} else {
 				username = context.usernames[userIndex];
-				userCommits = context.userData[username].commits;
-				drawIndividualChart(containerSelector, {
-					grade: context.disabledGradeData,
-					passRate: createChartData('passRate', userCommits, { username: username }),
-					coverage: createChartData('coverage', userCommits, { username: username }),
-					due: context.dateLineDue,
-					release: context.dateLineRelease
-				});
+				if (context.userData[username]) {
+					userCommits = context.userData[username].commits;
+					drawIndividualChart(containerSelector, {
+						grade: context.disabledGradeData,
+						passRate: createChartData('passRate', userCommits, { username: username }),
+						coverage: createChartData('coverage', userCommits, { username: username }),
+						due: context.dateLineDue,
+						release: context.dateLineRelease
+					});
+				}
 			}
 			$(containerSelector).find('.username-container').html(username || '');
 
@@ -435,21 +443,23 @@
 		$.each(teamNamesSorted, function(index, teamName) {
 			var $div, upperCaseTeamName, contributionDistribution;
 			var deliverableData = globalData.teams[teamName][deliverableName];
-			upperCaseTeamName = firstLetterUpperCase(teamName);
 			if (deliverableData) {
-				contributionDistribution = parseFloat(deliverableData.ctbDist);
-				background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
-			}
+				upperCaseTeamName = firstLetterUpperCase(teamName);
+				if (deliverableData) {
+					contributionDistribution = parseFloat(deliverableData.ctbDist);
+					background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
+				}
 
-			$div = $('<div>').addClass('team-cell')
-				.attr({'data-teamname': teamName, id: 'cell-'+deliverableName+'-'+teamName})
-				.css({background: background}).html('<svg></svg><span class="teamname">'+upperCaseTeamName+'</span>');
-			$deliverableOverview.append($div);
+				$div = $('<div>').addClass('team-cell')
+					.attr({'data-teamname': teamName, id: 'cell-'+deliverableName+'-'+teamName})
+					.css({background: background}).html('<svg></svg><span class="teamname">'+upperCaseTeamName+'</span>');
+				$deliverableOverview.append($div);
 
-			updateCellSize($deliverableOverview, $div);
+				updateCellSize($deliverableOverview, $div);
 
-			if (deliverableData) {
-				drawSparklineChart(createChartContext(teamName, deliverableName));
+				if (deliverableData) {
+					drawSparklineChart(createChartContext(teamName, deliverableName));
+				}
 			}
 		});
 	}
@@ -510,6 +520,11 @@
 		}
 	}
 
+	function onTeamInputBlur(e) {
+		var teamName = firstLetterUpperCase(currentState.teamName);
+		$(e.target).val(teamName);
+	}
+
 	// Called when the back button was clicked
 	function onBackButtonClick(e) {
 		updateState('back', {view: 'overview', teamName: '', users: []});
@@ -560,6 +575,7 @@
 		.on('click', '#teamline-buttons', onButtonClick)
 		.on('click', '#teamline-overview', onOverviewTeamClick)
 		.on('keyup', '#teamline-heading-input', onTeamChange)
+		.on('blur', '#teamline-heading-input', onTeamInputBlur);
 	;
 
 }());

@@ -1,73 +1,68 @@
 (function() {
 
-	// === data ===
-	// deliverables: { d1: { due: ..., release: ... }, ... },
-	// teams: { team1: { d1: {  }, ... } }    }
-	// === deliverable ===
-	// ctbDist: "0.5783", cvgGrd: "97.2800", grd:"99.4560", pGrd: "100.0000", users: {...}
+	// Cache for the global data that we load from the JSON file.
 	var globalData;
 
 	// Global state object and core of the application.
-	// Format: { deliverableName: (names in settings.deliverables), view: (names in settings.view), teamName: (name of team) }
 	// With a global state object we can easily upgrade to use the History API is we want.
 	var currentState;
 
 	// Configuration settings
 	var settings = {
-		teamlineDataPath: 'teamline-data-mini.json',
-		deliverables: ['d1', 'd2', 'd3'],
-		views: { team: 'team', overview: 'overview' },
-		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
-		overviewColumns: 8,
-	};
-
-	// Selectors for a few elements
-	var select = {
-		container: '#teamline',
-		chart: '#grade-chart',
-		chartUser1: '#user-chart-1',
-		chartUser2: '#user-chart-2',
-		overview: '#teamline-overview table',
-		buttons: '#teamline-buttons',
-		teamlineCharts: '#teamline-charts'
-	};
-
-	// Some generators for field-specific chart properties
-	var props = {
-		passRate: {
-			label: function (username) {
-				if (username) {
-					return username + ' pass rate contribution';
-				} else {
-					return 'Team pass rate';
-				}
+		teamlineDataPath: 'teamline-data-min.json',
+		numberRegex: /\d+/,
+		labels: {
+			team: {
+				grade: '% Grade'/*(80% Pass Rate + 20% Coverage)*/,
+				passRate: '% Pass Rate'/*(against instructor-written tests)*/,
+				coverage: '% Coverage'/*(of student-written tests)*/
 			},
-			color: '#ff7f0e'
+			user: {
+				grade: '', // niu
+				passRate: '% Contrib. to Pass Rate',
+				coverage: '% Contrib. to Coverage'
+			}
 		},
-		coverage: {
-			label: function (username) {
-				if (username) {
-					return username + ' coverage contribution';
-				} else {
-					return 'Team coverage';
-				}
+		colors: {
+			team: {
+				grade: '#162eae',
+				passRate: '#d95f02',
+				coverage: '#1b9e77'
 			},
-			color: '#667711'
-		},
-		grade: {
-			label: function() {
-				return 'Team grade';
-			},
-			color: '#A35BFF'
+			user: {
+				grade: 'white', // niu
+				passRate: '#377eb8',
+				coverage: '#66a61e'
+			}
 		}
 	};
 
 	// Handlebars templates
 	var templates = {
-		tooltip: Handlebars.compile($("#tooltip-template").html()),
-		buttons: Handlebars.compile($("#buttons-template").html())
+		tooltip: Handlebars.compile($('#tooltip-template').html()),
+		buttons: Handlebars.compile($('#buttons-template').html()),
+		legend: Handlebars.compile($('#legend-template').html())
 	};
 
+	function openGithubCommit(teamName, commitSha) {
+		var url = 'https://github.com/CS310-2017Jan/cpsc310project_'+teamName+'/commit/'+commitSha;
+		window.open(url);
+	}
+
+	// Make the first letter of the given string upper case
+	function firstLetterUpperCase(string) {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
+	// Central function for changing the global state. The state is extended by the given object, which means
+	// we don't need to pass all the information all the time.
+	function updateState(trigger, stateObj) {
+		currentState = $.extend(currentState, stateObj);
+		currentState.lastTrigger = trigger;
+		$(window).trigger('teamline.state.updated');
+	}
+
+	// Creates proper chart data based on the given type and options
 	function createChartData(type, commits, options) {
 		var values;
 		options = $.extend({}, options);
@@ -79,42 +74,70 @@
 			});
 		});
 		return {
-			key: props[type].label(options.username || null),
+			key: settings.labels[options.username ? 'user' : 'team'][type],
 			values: values,
-			color: props[type].color,
+			color: settings.colors[options.username ? 'user' : 'team'][type],
 			disabled: options.disabled === true
 		};
 	}
 
-	// Generates the HTML for the tooltips upon hover using Handlebars templating
+	// Creates the data set for a date line. This is used for our deliverable release date and due date lines.
+	function createDateLine(type, date) {
+		return {
+			key: type,
+			values: [{type: type, time: date, percentage: 0}, {type: type, time: date, percentage: 110}],
+			color: '#ccc',
+			classed: 'dashed dateline ' + type
+		};
+	}
+
+	// Global tooptip function that generates the HTML with the Handlebars template based on the given object
+	// environment.
 	function tooltip(object) {
 		var point = object.point;
 		var items = [
-			{ label: 'Time', value: moment(point.time).format('MMMM Do YYYY, h:mm:ss a') },
-			{ label: 'Grade', value: point.grd },
-			{ label: 'Passed Tests', value: point.pCnt },
-			{ label: 'Failed Tests', value: point.fCnt },
-			{ label: 'Skipped Tests', value: point.sCnt },
-			{ label: 'Coverage', value: point.cvg }
+			{ label: 'Time', value: moment(point.time).format('MMMM Do YYYY, h:mm:ss a') }
 		];
+
+		if (point.username) {
+			items = items.concat([
+				{ label: 'Contrib. to Pass Rate', value: d3.format('%')(point.pCtbAcc / 100) },
+				{ label: 'Contrib. to Coverage', value: d3.format('%')(point.cvgCtbAcc / 100) }
+			]);
+		} else {
+			items = items.concat([
+				{ label: 'Grade', value: d3.format('%')(point.grd / 100) },
+				{ label: 'Coverage', value: d3.format('%')(point.cvg / 100) },
+				{ label: 'Passed Tests', value: point.pCnt },
+				{ label: 'Failed Tests', value: point.fCnt },
+				{ label: 'Skipped Tests', value: point.sCnt }
+			]);
+		}
+
 		return templates.tooltip({ items: items });
 	}
 
-	// Adds the deliverable buttons to the DOM
+	// Adds the menu buttons to the DOM
 	function addButtons(deliverables) {
-		var buttons = [];
+		var buttons = [], renderedTemplate;
 		$.each(deliverables, function(index, deliverable) {
 			buttons.push({deliverable: deliverable, label: deliverable.toUpperCase(), classes: index === 0 ? 'active' : ''});
 		});
-		var renderedTemplate = templates.buttons({buttons: buttons});
+		renderedTemplate = templates.buttons({buttons: buttons});
 		$('#teamline-buttons').append(renderedTemplate);
 	}
 
-	function getChartId(username) {
-		return 'chart-'+username;
+	// Add a custom legend with the given items to the container specified
+	function addLegend(containerSelector, items) {
+		var $container = $(containerSelector);
+		if (!$container.find('.teamline-legend').length) {
+			$(containerSelector).prepend(templates.legend({ items: items }));
+		}
 	}
 
-	function drawChart(options) {
+	// Main function to draw a line chart with NVD3. Takes the environment specified in the options argument and
+	// overrides defaults.
+	function drawLineChart(options) {
 		var $container = $(options.containerSelector);
 		var chartSelector = options.containerSelector + ' svg';
 		var $chart = $(chartSelector);
@@ -133,9 +156,9 @@
 				.tooltipContent(options.tooltip || tooltip)
 				.x(options.x)
 				.y(options.y)
-				.showLegend(false)
 				.showYAxis(options.showYAxis !== false)
-				.showXAxis(options.showXAxis !== false);
+				.showXAxis(options.showXAxis !== false)
+				.showLegend(false);
 
 			var d3obj = d3.select(chartSelector).datum(options.data);
 
@@ -148,14 +171,15 @@
 				return d3.time.format('%b %d')(new Date(timestamp))
 			});
 			chart.yAxis.tickPadding(options.yTickPadding || 0);
-
-			chart.xAxis.axisLabel("LABELX");
-			chart.yAxis.axisLabel("LABELY");
-
 			chart.forceX(options.forceX);
 
 			chart.forceX([0, 110]);
-			chart.forceY([deliverable.release-57600000, deliverable.due+57600000]);
+			chart.forceY([deliverable.release-172800000, deliverable.due+103680000]);
+
+			chart.lines.dispatch.on('elementClick', function(e) {
+				var point = e.point;
+				openGithubCommit(currentState.teamName, point.sha);
+			});
 
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
 
@@ -164,51 +188,148 @@
 			nv.utils.windowResize(function() {
 				updateSize(d3obj, chart);
 			});
+
+			options.done && options.done();
+
 		});
 	}
 
+	// Draws the grade chart in the left quarter
 	function drawGradeChart(context) {
-		drawChart({
-			containerSelector: '#grade-chart-container',
+		var containerSelector = '#grade-chart-container';
+		drawLineChart({
+			containerSelector: containerSelector,
 			margin: {top: 0, right: 0, bottom: 0, left: 50},
-			data: [context.gradeChartData.coverage, context.gradeChartData.passRate, context.gradeChartData.grade],
-			x: function(commit) {
+			data: [context.gradeChartData.coverage, context.gradeChartData.passRate, context.gradeChartData.grade,
+				context.gradeChartData.release, context.gradeChartData.due],
+			x: function(point) {
 				var options = {
-					passRate: parseFloat(commit.pPct),
-					grade: parseFloat(commit.grd),
-					coverage: parseFloat(commit.cvg)
+					passRate: parseFloat(point.pPct),
+					grade: parseFloat(point.grd),
+					coverage: parseFloat(point.cvg),
+					release: point.percentage,
+					due: point.percentage
 				};
-				return options[commit.type];
+				return options[point.type];
 			},
-			y: function(commit) {
-				return commit.time;
+			y: function(point) {
+				return point.time;
 			},
 			xTickPadding: -15,
 			yTickPadding: 5
 		});
+		addLegend(containerSelector, [
+			{ key: 'teamPassRate', label: settings.labels.team.passRate, color: settings.colors.team.passRate },
+			{ key: 'teamCoverage', label: settings.labels.team.coverage, color: settings.colors.team.coverage },
+			{ key: 'teamGrade', label: settings.labels.team.grade, color: settings.colors.team.grade }
+		]);
 	}
 
-	function drawIndividualChart(containerSelector, username, chartData, options) {
+	// Draws an individual chart for a user. Used for the two charts on the right.
+	function drawIndividualChart(containerSelector, chartData, options) {
 		var defaults = {
 			containerSelector: containerSelector,
-			data: [chartData.coverage, chartData.passRate, chartData.grade],
-			x: function(commit) {
+			data: [chartData.coverage, chartData.passRate, chartData.grade,
+				chartData.release, chartData.due],
+			x: function(point) {
 				var options = {
-					passRate: parseFloat(commit.pCtbAcc),
-					grade: parseFloat(commit.grd),
-					coverage: parseFloat(commit.cvgCtbAcc)
+					passRate: parseFloat(point.pCtbAcc),
+					grade: parseFloat(point.grd),
+					coverage: parseFloat(point.cvgCtbAcc),
+					release: point.percentage,
+					due: point.percentage
 				};
-				return options[commit.type];
+				return options[point.type];
 			},
-			y: function(commit) {
-				return commit.time;
+			y: function(point) {
+				return point.time;
 			},
 			xTickPadding: -15,
 			yTickPadding: 5
 		};
-		drawChart($.extend(defaults, options));
+		drawLineChart($.extend(defaults, options));
 	}
 
+	// Draws the two user charts on the right
+	function drawUserCharts(context) {
+		$.each([0,1], function(index) {
+			var userIndex = currentState.users[index];
+			var containerSelector = '#user-chart-'+(index+1)+'-container';
+			var username, userCommits;
+			if (userIndex === undefined) {
+				drawIndividualChart(containerSelector, context.emptyChartData);
+			} else {
+				username = context.usernames[userIndex];
+				if (context.userData[username]) {
+					userCommits = context.userData[username].commits;
+					drawIndividualChart(containerSelector, {
+						grade: context.disabledGradeData,
+						passRate: createChartData('passRate', userCommits, { username: username }),
+						coverage: createChartData('coverage', userCommits, { username: username }),
+						due: context.dateLineDue,
+						release: context.dateLineRelease
+					});
+				}
+			}
+			$(containerSelector).find('.username-container').html(username || '');
+
+			if (index === 0) {
+				addLegend(containerSelector, [
+					{ label: settings.labels.user.passRate, color: settings.colors.user.passRate },
+					{ label: settings.labels.user.coverage, color: settings.colors.user.coverage }
+				]);
+			}
+		});
+	}
+
+	// Draws the small charts in the bottom gallery.
+	function drawGalleryCharts(context) {
+		$.each(context.usernames, function(index, username) {
+			var userCommits = context.userData[username].commits;
+			var userChartIndex = currentState.users.indexOf(index);
+			var hasFocus = userChartIndex === 0 || userChartIndex === 1;
+			var galleryContainerSelector = appendGalleryChartContainer(username, hasFocus);
+			var chartData = {
+				grade: context.disabledGradeData,
+				passRate: createChartData('passRate', userCommits, { username: username }),
+				coverage: createChartData('coverage', userCommits, { username: username }),
+				release: context.dateLineRelease,
+				due: context.dateLineDue
+			};
+			var $usernameContainer = $('<div class="username-container">').html(username);
+			$(galleryContainerSelector).append($usernameContainer);
+			drawIndividualChart(galleryContainerSelector, chartData, {
+				showYAxis: false,
+				showXAxis: false,
+				tooltip: $.noop
+			});
+		});
+	}
+
+	// Draws a sparkline chart. Used for the overview cells.
+	function drawSparklineChart(context, done) {
+		var data = [];
+		var width = 50, height = 50;
+		var finalGrade = parseFloat(context.deliverableTeamResult.grd);
+		$.each(context.gradeChartData.grade.values, function(index, point) {
+			data.push({x: parseFloat(point.grd), y: point.time});
+		});
+		nv.addGraph(function() {
+			var chart = nv.models.sparkline()
+				.width(width)
+				.height(height)
+				.margin({top: 3, right: 3, bottom: 3, left: 3})
+				.xRange([0, (finalGrade / 100) * width])
+				.color([settings.colors.team.grade]);
+			d3.select('#cell'+'-'+context.deliverableName+'-'+context.teamName+' svg')
+				.datum(data)
+				.call(chart);
+
+			done && done();
+		});
+	}
+
+	// Adds a container in the gallery for a gallery chart
 	function appendGalleryChartContainer(username, hasFocus) {
 		var containerSelector = '.gallery-chart-container[data-username="'+username+'"]';
 		var $chartContainer = $('<div class="gallery-chart-container" data-username="'+username+'">');
@@ -221,12 +342,16 @@
 		return containerSelector;
 	}
 
-	function createChartContext() {
-		var teamData = globalData.teams[currentState.teamName];
-		var targetDeliverable = teamData[currentState.deliverableName];
-		var userData = targetDeliverable.users;
+	// Create a context object that establishes the environment for drawing a chart
+	function createChartContext(teamName, deliverableName) {
+		var teamData = globalData.teams[teamName || currentState.teamName];
+		var deliverableObj = globalData.deliverables[deliverableName || currentState.deliverableName];
+		var deliverableTeamResult = teamData[deliverableName || currentState.deliverableName];
+		var userData = deliverableTeamResult.users;
 		var usernames = Object.keys(userData).sort();
 		var allCommits = [], gradeChartData, disabledGradeData, emptyChartData;
+		var dateLineRelease = createDateLine('release', deliverableObj.release),
+			dateLineDue = createDateLine('due', deliverableObj.due);
 
 		$.each(usernames, function(index, username) {
 			var userCommits = userData[username].commits;
@@ -240,7 +365,9 @@
 		gradeChartData = {
 			grade: createChartData('grade', allCommits),
 			passRate: createChartData('passRate', allCommits),
-			coverage: createChartData('coverage', allCommits)
+			coverage: createChartData('coverage', allCommits),
+			release: dateLineRelease,
+			due: dateLineDue
 		};
 
 		disabledGradeData = $.extend({}, gradeChartData.grade);
@@ -249,58 +376,26 @@
 		emptyChartData = {
 			grade: disabledGradeData,
 			passRate: createChartData('passRate', []),
-			coverage: createChartData('coverage', [])
+			coverage: createChartData('coverage', []),
+			release: dateLineRelease,
+			due: dateLineDue
 		};
 
 		return {
+			teamName: teamName,
+			deliverableTeamResult: deliverableTeamResult,
+			deliverableName: deliverableName,
 			userData: userData,
 			usernames: usernames,
 			gradeChartData: gradeChartData,
 			disabledGradeData: disabledGradeData,
-			emptyChartData: emptyChartData
+			emptyChartData: emptyChartData,
+			dateLineRelease: dateLineRelease,
+			dateLineDue: dateLineDue
 		};
 	}
 
-	function drawUserCharts(context) {
-		$.each([0,1], function(index) {
-			var userIndex = currentState.users[index];
-			var containerSelector = '#user-chart-'+(index+1)+'-container';
-			var username, userCommits;
-			if (userIndex === undefined) {
-				drawIndividualChart(containerSelector, '', context.emptyChartData);
-			} else {
-				username = context.usernames[userIndex];
-				userCommits = context.userData[username].commits;
-				drawIndividualChart(containerSelector, username, {
-					grade: context.disabledGradeData,
-					passRate: createChartData('passRate', userCommits, { username: username }),
-					coverage: createChartData('coverage', userCommits, { username: username })
-				});
-			}
-		});
-	}
-
-	function drawGalleryCharts(context) {
-		$.each(context.usernames, function(index, username) {
-			var userCommits = context.userData[username].commits;
-			var userChartIndex = currentState.users.indexOf(index);
-			var hasFocus = userChartIndex === 0 || userChartIndex === 1;
-			var galleryContainerSelector = appendGalleryChartContainer(username, hasFocus);
-			var chartData = {
-				grade: context.disabledGradeData,
-				passRate: createChartData('passRate', userCommits, { username: username }),
-				coverage: createChartData('coverage', userCommits, { username: username })
-			};
-			drawIndividualChart(galleryContainerSelector, username, chartData, {
-				showYAxis: false,
-				showXAxis: false,
-				tooltip: $.noop
-			});
-		});
-	}
-
-	// Draws a team chart based on the current global state
-	// TODO: need to think about deliverable start date, end date and what date range to show in the chart!
+	// Draw all the charts in the team view
 	function drawTeamCharts() {
 		var context = createChartContext();
 		drawGradeChart(context);
@@ -308,76 +403,96 @@
 		drawUserCharts(context);
 	}
 
-	// Creates the overview table
-	// TODO: luminance for table cell background is currently based on random generated numbers!
-	function createOverview() {
-		var count;
-		var background,
-			h = settings.overviewBackground.hue,
-			s = settings.overviewBackground.saturation,
-			l = settings.overviewBackground.luminance;
+	// Creates the overview content for the given deliverable. This should only be called if the overview
+	// wasn't created before.
+	function createOverview(deliverableName) {
+		var $overview = $('#teamline-overview');
+		var $deliverableOverview = $('<div>').attr('id', 'overview-'+deliverableName).addClass('deliverable-overview');
+		$overview.append($deliverableOverview);
+		$deliverableOverview.addClass('active');
 
-		var $tr = $('<tr>'), $td;
-		// Calculate a value 0 <= X <= 50 which is added to the base luminance in settings.overviewBackground
-		// 50% luminance = 100% grade; 100% luminance = 0% grade
-		var getLuminanceDiff = function() {
-			var grade = Math.random() * 100; // TODO
-			return (grade - 100) * (-1);
+		var background = 'white',
+			h = 31,
+			s = 100,
+			l = 50;
+
+		var getLightnessDiff = function(contributionDistribution) {
+			return (contributionDistribution / 2) * 100;
 		};
-		for (count = 1; count < 200; count++) {
-			background = 'hsl('+h+','+s+'%,'+(l+getLuminanceDiff())+'%)';
-			$td = $('<td>').attr('data-teamname', 'team'+count).css({background: background}).text('Team'+count);
-			$tr.append($td);
-			if ($tr.children().length === settings.overviewColumns) {
-				$(select.overview).append($tr);
-				$tr = $('<tr>');
+
+		var teamNamesSorted = Object.keys(globalData.teams).sort(function(team1, team2) {
+			var team1Num = settings.numberRegex.exec(team1)[0];
+			var team2Num = settings.numberRegex.exec(team2)[0];
+			if (team1Num && team2Num) {
+				team1Num = parseInt(team1Num, 10);
+				team2Num = parseInt(team2Num, 10);
+				return team1Num - team2Num;
+			} else {
+				return team1 - team2;
 			}
-		}
+		});
+
+		var updateCellSize = function($container, $div) {
+			var containerWidth = $container.outerWidth();
+			var cellWidth = $div.outerWidth();
+			var cellsInRow = Math.floor(containerWidth / cellWidth);
+			var newWidthAndHeight = containerWidth / cellsInRow;
+			$div.css({width: newWidthAndHeight, height: newWidthAndHeight});
+		};
+
+		$.each(teamNamesSorted, function(index, teamName) {
+			var $div, upperCaseTeamName, contributionDistribution;
+			var deliverableData = globalData.teams[teamName][deliverableName];
+			if (deliverableData) {
+				upperCaseTeamName = firstLetterUpperCase(teamName);
+				if (deliverableData) {
+					contributionDistribution = parseFloat(deliverableData.ctbDist);
+					background = 'hsl('+h+','+s+'%,'+(l+getLightnessDiff(contributionDistribution))+'%)';
+				}
+
+				$div = $('<div>').addClass('team-cell')
+					.attr({'data-teamname': teamName, id: 'cell-'+deliverableName+'-'+teamName})
+					.css({background: background}).html('<svg></svg><span class="teamname">'+upperCaseTeamName+'</span>');
+				$deliverableOverview.append($div);
+
+				updateCellSize($deliverableOverview, $div);
+
+				if (deliverableData) {
+					drawSparklineChart(createChartContext(teamName, deliverableName));
+				}
+			}
+		});
 	}
 
-	// Always call this when something in the view needs to update, i.e. when the global state has changed
-	function updateView() {
-		$(select.chart+','+select.overview).html('');
-		$(select.container).attr('data-view', currentState.view);
-		if (currentState.view === settings.views.team) {
-			drawTeamCharts();
-		} else {
-			createOverview();
+	// Sets the contents of the heading in the menu
+	function setHeading() {
+		var teamName = currentState.teamName;
+		var $input = $('#teamline-heading-input');
+		if (teamName) {
+			teamName = firstLetterUpperCase(teamName);
 		}
+		$input.val(teamName || 'Overview').attr('disabled', !teamName);
 	}
 
 	// Called when a deliverable button was clicked
 	function onButtonClick(e) {
-		var $button = $(this);
+		var $button = $(e.target).closest('button');
 		if (!$button.hasClass('active')) {
-			updateState('button', { deliverableName: $(this).data('deliverable') });
+			updateState('button', { deliverableName: $button.data('deliverable') });
 		}
-		$button.addClass('active').siblings().removeClass('active');
 	}
 
 	// Called when a cell in the overview was clicked
-	function onOverviewTdClick(e) {
-		var $td = $(this);
-		var teamName = $td.attr('data-teamname');
-		updateState('overviewcell', { view: settings.views.team, teamName: teamName });
-		if (!teamData[teamName]) {
-			loadData(updateView);
-		} else {
-			updateView();
-		}
+	function onOverviewTeamClick(e) {
+		var $cell = $(e.target).closest('.team-cell');
+		var teamName = $cell.attr('data-teamname');
+		updateState('overviewcell', { view: 'team', teamName: teamName, users: [0,1] });
 	}
 
-	// Central function for changing the global state. The state is extended by the given object, which means
-	// we don't need to pass all the information all the time.
-	function updateState(trigger, stateObj) {
-		currentState = $.extend(currentState, stateObj);
-		currentState.lastTrigger = trigger;
-		$(window).trigger('teamline.state.updated');
-	}
-
+	// Called when a gallery chart was clicked
 	function onGalleryItemClick(e) {
+		var $target = $(e.target).closest('.gallery-chart-container');
 		var activeIndexes = [];
-		var $target = $(this);
 		var changeState = true;
 		if (!$target.hasClass('active')) {
 			if ($('.gallery-chart-container.active').length < 2) {
@@ -397,36 +512,70 @@
 		}
 	}
 
+	// Called when the team name in the heading was changed
+	function onTeamChange(e) {
+		var value = $(e.target).closest('input').val().toLowerCase();
+		if (globalData.teams[value]) {
+			updateState('teamchange', { teamName: value });
+		}
+	}
+
+	function onTeamInputBlur(e) {
+		var teamName = firstLetterUpperCase(currentState.teamName);
+		$(e.target).val(teamName);
+	}
+
+	// Called when the back button was clicked
+	function onBackButtonClick(e) {
+		updateState('back', {view: 'overview', teamName: '', users: []});
+	}
+
+	// Show the overview for the current deliverable. Create its contents if that didn't happen before.
+	function showOverview() {
+		var deliverableName = currentState.deliverableName;
+		var selector = '#overview-'+deliverableName;
+		if (!$(selector).length) {
+			createOverview(deliverableName);
+		}
+		$(selector).addClass('active').siblings().removeClass('active');
+	}
+
+	// Fetch our JSON data and initialize the whole thing
 	$.getJSON(settings.teamlineDataPath, function(data) {
 		var buttons, bodyHeight = $(document.body).outerHeight();
 		globalData = data;
 		buttons = Object.keys(globalData.deliverables);
-		buttons.push(settings.buttonAllLabel);
-		$(select.container).height(bodyHeight).addClass('visible');
+		$('#teamline').height(bodyHeight).addClass('visible');
 		addButtons(buttons);
-		//updateState({ deliverableName: 'd1', view: 'overview' }); // show overview on page load
-		updateState('init', { deliverableName: 'd2', view: settings.views.team, teamName: 'team19', users: [0,1] });
+		updateState('init', { deliverableName: 'd1', view: 'overview' }); // show overview on page load
 	});
 
+	// Main listener called whenever our global state changes
 	$(window).on('teamline.state.updated', function(e) {
-		$(select.container).attr('data-view', currentState.view);
-		if (currentState.view === settings.views.team) {
-			if (currentState.lastTrigger === 'gallery') {
+		$('#teamline').attr('data-view', currentState.view);
+		$('button[data-deliverable="'+currentState.deliverableName+'"]').addClass('active').siblings().removeClass('active');
+		setHeading();
+		if (currentState.view === 'team') {
+			if (currentState.lastTrigger !== 'gallery') {
+				$('#teamline-gallery, #teamline-charts svg').html('');
+				drawTeamCharts();
+			} else {
 				$('.user-chart').html('');
 				drawUserCharts(createChartContext());
-			} else {
-				$('#teamline-gallery, svg').html('');
-				drawTeamCharts();
 			}
+		} else if (currentState.view === 'overview') {
+			showOverview();
 		}
 	});
 
-	window.setTeam = function(teamName) {
-		updateState('teamchange', { teamName: teamName });
-	};
-
-	$(select.buttons).on('click', 'button', onButtonClick);
-	$(select.overview).on('click', 'td', onOverviewTdClick);
-	$(select.container).on('click', '.gallery-chart-container', onGalleryItemClick);
+	// Adds all the listeners we need for interaction
+	$('#teamline')
+		.on('click', '.gallery-chart-container', onGalleryItemClick)
+		.on('click', '#back-button', onBackButtonClick)
+		.on('click', '#teamline-buttons', onButtonClick)
+		.on('click', '#teamline-overview', onOverviewTeamClick)
+		.on('keyup', '#teamline-heading-input', onTeamChange)
+		.on('blur', '#teamline-heading-input', onTeamInputBlur);
+	;
 
 }());

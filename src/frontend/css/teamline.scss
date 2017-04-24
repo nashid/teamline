@@ -23,7 +23,7 @@ $grey_border_thin: 1px solid #ccc;
   }
 
   &[data-view="team"] {
-    #teamline-overview {
+    #teamline-overview, #overview-legend {
       display: none;
     }
   }
@@ -90,17 +90,47 @@ $grey_border_thin: 1px solid #ccc;
 #teamline-menu {
   width: 100%;
   height: 6%;
-  padding: 5px 51px;
+  padding: 5px 15px;
   border-bottom: $grey_border;
 
   > * {
+    vertical-align: middle;
     display: inline-block;
   }
 }
 
-#teamline-heading-input {
-  vertical-align: middle;
+#teamline-logo {
   font-weight: bold;
+  font-size: 25px;
+  margin-right: 50px;
+}
+
+#overview-legend {
+  margin-left: 30px;
+
+  span {
+    display: inline-block;
+    vertical-align: middle;
+
+    &.text {
+      width: 30px;
+      line-height: 15px;
+      font-size: 16px;
+      width: 60px;
+    }
+    &.gradient {
+      margin-right: 5px;
+      background: black;
+      width: 100px;
+      height: 25px;
+      background: linear-gradient(to right, hsl(31, 100%, 50%), hsl(31, 100%, 100%));
+    }
+
+  }
+
+}
+
+#teamline-heading-input {
   padding: 0 6px;
   font-size: 22px;
   margin: 0 10px;

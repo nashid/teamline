@@ -1,3 +1,7 @@
+## Teamline 1.0 (2017-04-23)
+
+Hand-in version.
+
 ## Teamline 0.1 (2017-04-11)
 
 This is a working initial base version. The Teamline frontend source files are in /src/frontend. I added SASS/Compass to the project which has its configuration in config.rb. You can setup Compass in your local environment and call `compass watch` in the frontend directory for auto-compilation on save. I also added the Handlebars templating engine. Templates are in index.html.
