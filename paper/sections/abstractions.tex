@@ -1,21 +1,19 @@
 \documentclass[../manifest.tex]{subfiles}
 
 \begin{document}
+\subsection{Domain Background}
 Our tool visualizes data collected by AutoTest\footnote{http://github.com/nickbradley/autotest},
 an automatic grading service used to grade code submissions for students in
 CPSC310. The course is structured around a term-long coding project that is
-divided into 5 deliverables/sprints completed by teams consisting of 2-3 students.
+divided into 5 deliverables (or sprints) completed by teams consisting of 2-3 students.
 The first 3 of these deliverables are graded by a combination of AutoTest and TAs.
 Teams manage their shared code on GitHub\footnote{http://github.com}
 using a basic git workflow: students pull the latest code changes from GitHub,
 commit their modified code locally and then push those commits to GitHub for
 other members to see. Every time a student pushes their changes, AutoTest is
-automatically invoked and runs a private suite of tests against the modified
+automatically invoked and runs a suite of instructor-written tests against the modified
 code. Results are stored in a NoSQL database with each record corresponding to a
-single submission (push event). The relevant attributes are briefly described in
-Table 1. We have collected data for over 24,000 submissions for the first two
-deliverables; complete data for the third deliverable will be available on March
-13. There are 285 students in 139 teams.
+single submission (push event).
 
 After a submission deadline, TAs meet with their assigned
 teams to conduct a retrospective to discuss any challenges that arose
@@ -34,4 +32,52 @@ made. This can be a decent proxy but can be misleading since different people ha
 different commit habits (some will commit every line, others only large changes)
 and they may not reflect the actual contribution to the grade (i.e. commits that
 don't directly increase the grade).
+
+
+
+\subsection{Data Description}
+Our grade dataset mentioned earlier is treated as a static table which contains over 44,000 submission records for 285 students in 139 teams. From this dataset we use the attributes shown in table \ref{tab:attributes}. From those attributes we created the following derived attributes:
+
+\textbf{Pass rate contribution.} A student's commit is considered as contributing to the team's test pass percentage if one or more tests are passed for the first time with this commit. The contribution calculated as the number of passing for the first time divided by the total number of tests passed by the team. We do not visualize this value value directly. Instead, we visualize the accumulated value over all commits to ensure that the plotted points are monotonic. This is a quantitative attribute ranging from 0-100\%.
+
+\textbf{Coverage contribution.} We consider a contribution to the coverage grade to occur when a commit increases the coverage grade beyond anything seen so far. The amount of the  contribution is the amount by which which it exceeds the running maximum. Again, we accumulate this value to ensure a monotonic line. Note that the coverage is increased when a student writes (more) tests that execute a higher proportion of their code or they change the total lines of code. This is a quantitative attribute ranging from 0-100\%.
+
+\textbf{Overall contribution.} The overall contribution is computed as the sum of 80\% pass rate contribution and 20\% coverage contribution to match the weighting used in computing the deliverable grade. This attribute is quantitative and ranges between 0 and 100\%.
+
+\textbf{Within team contribution uniformity (CU).} This measures how evenly the team members contributed. It is a quantitative attribute that ranges from 0 to 1 where 0 indicates that one team member did all the work while 1 indicates completely uniform workload split (each member contributed equally). This attribute is computed by taking the sorted pairwise difference of the overall contribution (computed as 80\% test grade contribution and 20\% coverage grade contribution) of each team member. More specifically, if $m$ is the number of team members and $u_i$ is the overall contribution for the $i$th team member (sorted by overall contribution), then we have
+
+\begin{equation}
+  \label{eq:con-uniform}
+  CU = \sum_{i=1}^{m-1} |u_i - u_{i+1}|.
+\end{equation}
+
+
+\begin{table*}[t]
+  \label{tab:attributes}
+  \centering
+  \begin{threeparttable}
+      \caption{Dataset Attributes.}
+  \begin{tabular*}{\textwidth}{lll}
+    \hline
+    \textbf{Attribute Name} & \textbf{Attribute Type} & \textbf{Description} \\
+    \hline
+    pass rate     & Quantitative & Percentage of instructor-written tests that passed against student code. \\
+    coverage  & Quantitative & Percentage of student code executed by student-written tests. \\
+    grade     & Quantitative & Computed as 80\% pass rate + 20\% coverage. \\
+    timestamp      & Sequential   & Unix time of record creation. \\
+    commitID      & Categorical  & The (partial) SHA-1 hash of the submitted commit. \\
+    githubID      & Categorical\tnote{a}  & The GitHub ID of the student making the submission. \\
+    team           & Categorical\tnote{b}  & The team number, stored as \textit{teamXXX}, where \textit{XXX} is a number between 2 and 199. \\
+    deliverable    & Sequential   & The submission deliverable, which can have values \textit{d1}, \textit{d2}, or \textit{d3}. \\
+    \hline
+  \end{tabular*}
+  \begin{tablenotes}\footnotesize
+    \item [a] 285 values currently; max $<1000$.
+    \item [b] 139 values currently; max $<1000$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table*}
+
+
+\subsection{Task Description}
 \end{document}
