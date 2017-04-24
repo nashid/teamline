@@ -1,31 +1,104 @@
+$grey_border: 3px solid #ccc;
+
 #teamline {
   position: relative;
+  display: none;
+  width: 100%;
+  background: white;
 
   ul {
     padding: 0;
     margin: 0;
   }
 
+  button {
+    &:focus {
+      outline: none;
+    }
+  }
+
   &.visible {
     display: block;
   }
-  display: none;
-  width: 100%;
-  background: #fcf8e3;
+
+  &[data-view="team"] {
+    #teamline-overview {
+      display: none;
+    }
+  }
+
+  &[data-view="overview"] {
+    #teamline-charts, #teamline-gallery, #teamline-legend-details {
+      display: none;
+    }
+    #back-button {
+      visibility: hidden;
+    }
+  }
+
+  svg {
+    .nv-noData {
+      display: none;
+    }
+  }
+
+}
+
+#teamline-overview {
+
+  .deliverable-overview {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
+  .team-cell {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+    overflow: hidden;
+    color: #444;
+    &:hover {
+      background-color: #aaa !important;
+      color: white;
+      cursor: pointer;
+    }
+  }
+
+  &.drawing svg {
+    //display: none;
+  }
 }
 
 #teamline-menu {
   width: 100%;
   height: 6%;
-  text-align: center;
-  padding-top: 5px;
+  padding: 5px 51px;
+  border-bottom: $grey_border;
+
+  > * {
+    display: inline-block;
+  }
 }
 
-#teamline-buttons {
-  button {
-    &:focus {
-      outline: none;
-    }
+#teamline-heading-input {
+  vertical-align: middle;
+  font-weight: bold;
+  padding: 0 6px;
+  font-size: 22px;
+  margin: 0 10px;
+  width: 150px;
+  text-align: center;
+  &:not(:focus) {
+    background: inherit;
+    border: none;
+  }
+  &:focus {
+    outline: none;
   }
 }
 
@@ -45,19 +118,23 @@
 #teamline-stage {
   width: 100%;
   height: 94%;
+  overflow: auto;
+
+  .username-container {
+    width: 95%;
+    position: absolute;
+    text-align: center;
+  }
 
   #teamline-charts {
-    $border: 3px solid #ccc;
     overflow: auto;
     width: 100%;
     height: 75%;
     background: white;
-    border-top: $border;
-    border-bottom: $border;
+    border-bottom: $grey_border;
 
     > div {
       float: left;
-      width: 33.333333%;
       height: 100%;
 
       &:nth-child(1) {
@@ -72,11 +149,19 @@
         width: 30%;
       }
     }
+
+    .username-container {
+      bottom: 15px;
+      left: 10px;
+      font-size: 22px;
+    }
   }
+
   #teamline-gallery {
     width: 100%;
     height: 25%;
   }
+
 }
 
 #teamline-charts svg {
@@ -107,29 +192,20 @@
 
   .nv-y {
     .nv-axis {
-      %dashed-line {
-        stroke-width: 3px;
-        stroke: #aaa;
-        stroke-dasharray: 5,5;
-      }
-
       .tick {
         &:first-child {
           line {
             display: none;
           }
         }
-        &:nth-last-of-type(1) {
-          position: relative;
-          line {
-            @extend %dashed-line;
-          }
-        }
-        &:nth-of-type(2) {
-          line {
-            @extend %dashed-line;
-          }
-        }
+      }
+    }
+  }
+
+  &.grade-chart {
+    .nv-series-3, .nv-series-4 {
+      .nv-point {
+        display: none;
       }
     }
   }
@@ -138,7 +214,28 @@
     .nv-y .nv-axis .tick text {
       display: none;
     }
+
+    .nv-series-2, .nv-series-3 {
+      .nv-point {
+        display: none;
+      }
+    }
   }
+
+  .nv-group {
+    &.dashed {
+      stroke-dasharray: 10, 5;
+      stroke-width: 4px !important;
+    }
+    &.release {
+      color: red;
+    }
+    &.due {
+      color: blue;
+    }
+  }
+
+
 
 }
 
@@ -147,20 +244,31 @@
   padding: 10px;
 
   .gallery-chart-container {
+    position: relative;
     float: left;
     width: 170px;
+    height: 160px;
     border: 3px solid #ccc;
     margin-right: 10px;
     background: white;
     background-image: url('../images/unchecked.png');
     background-size: 20px 20px;
-    background-position: 98% 98%;
+    background-position: 102% -2%;
     background-repeat: no-repeat;
 
     &.active {
       background-image: url('../images/checked.png');
       border-color: #62b1f6;
     }
+
+    .username-container {
+      bottom: 2px;
+    }
+
+    .dateline {
+      display: none;
+    }
+
   }
 
   svg {

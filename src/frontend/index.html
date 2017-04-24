@@ -15,19 +15,23 @@
 
         <div id="teamline">
             <div id="teamline-menu">
+                <button id="back-button" type="button" class="btn btn-default"><< Overview</button>
+                <input id="teamline-heading-input"></input>
                 <div id="teamline-buttons"></div>
             </div>
             <div id="teamline-stage">
-                <div id="teamline-overview"><table></table></div>
+                <div id="teamline-overview"></div>
                 <div id="teamline-charts">
                     <div id="grade-chart-container" class="chart-container">
-                        <svg></svg>
+                        <svg class="grade-chart"></svg>
                     </div>
                     <div id="user-chart-1-container" class="chart-container user-chart-container">
                         <svg class="user-chart"></svg>
+                        <div class="username-container"></div>
                     </div>
                     <div id="user-chart-2-container" class="chart-container user-chart-container">
                         <svg class="user-chart"></svg>
+                        <div class="username-container"></div>
                     </div>
                 </div>
                 <div id="teamline-gallery"></div>
@@ -39,7 +43,7 @@
                     </ul>
                 </div>
             </div>
-
+            <div id="teamline-overview-charts"></div>
         </div>
 
         <script id="tooltip-template" type="text/x-handlebars-template">

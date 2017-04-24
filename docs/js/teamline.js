@@ -19,11 +19,6 @@
 		views: { team: 'team', overview: 'overview' },
 		overviewBackground: { hue: 111, saturation: 78, luminance: 50 },
 		overviewColumns: 8,
-		margin: {top: 20, right: 50, bottom: 0, left: 50},
-		//legendMargin: {top: 10, right: 80, left: 0, bottom: 30},
-		marginTopToXAxis: 80, // TODO: don't know how to calculate this
-		tooltipDateFormat: 'MMMM Do YYYY, h:mm:ss a',
-		buttonAllLabel: 'all'
 	};
 
 	// Selectors for a few elements
@@ -95,7 +90,7 @@
 	function tooltip(object) {
 		var point = object.point;
 		var items = [
-			{ label: 'Time', value: moment(point.time).format(settings.tooltipDateFormat) },
+			{ label: 'Time', value: moment(point.time).format('MMMM Do YYYY, h:mm:ss a') },
 			{ label: 'Grade', value: point.grd },
 			{ label: 'Passed Tests', value: point.pCnt },
 			{ label: 'Failed Tests', value: point.fCnt },
@@ -160,10 +155,7 @@
 			chart.forceX(options.forceX);
 
 			chart.forceX([0, 110]);
-			// TODO: WORK OVER THIS!
-			// 1209600000 = 2 weeks in ms; 172800000 = 1 day in ms
 			chart.forceY([deliverable.release-57600000, deliverable.due+57600000]);
-			//chart.legend.margin(settings.legendMargin);
 
 			$chart.data({d3obj: d3obj, nvd3obj: chart});
 
