@@ -2,41 +2,72 @@
     <head>
         <meta charset="utf-8">
         <title>Teamline</title>
+        <!-- Twitter Bootstrap for some straight-forward layouting -->
         <link rel="stylesheet" href="css/lib/bootstrap.min.css">
+        <!-- NVD3 styles -->
         <link rel="stylesheet" href="css/lib/nv.d3.css">
+        <!-- Our own styles -->
         <link rel="stylesheet" href="css/teamline.css">
+        <!-- Handlebars is our templating engine -->
         <script src="js/lib/handlebars.js"></script>
+        <!-- Moment for date formatting -->
         <script src="js/lib/moment.js"></script>
+        <!-- D3 as our core chart library -->
         <script src="js/lib/d3.v3.min.js"></script>
+        <!-- NVD3 on top of D3 -->
         <script src="js/lib/nv.d3.min.js"></script>
+        <!-- jQuery for DOM manipulation and better general JavaScript programming -->
         <script src="js/lib/jquery-3.2.0.min.js"></script>
     </head>
     <body>
 
+        <!-- Our main wrapper that contains all the markup we need for Teamline -->
         <div id="teamline">
+            <!-- Our menu bar on the top -->
             <div id="teamline-menu">
+                <!-- This button will bring us back from the team view to the overview -->
+                <button id="back-button" type="button" class="btn btn-default"><< Overview</button>
+                <!-- This is the heading that contains either the current team's name or the overview heading.
+                    Our heading is essentially an input field because we use it for changing the team dynamically. YEAH! -->
+                <input id="teamline-heading-input"></input>
+                <!-- Our deliverable buttons -->
                 <div id="teamline-buttons"></div>
             </div>
+            <!-- The Teamline stage! The main charts and the overview are drawn to the stage! -->
             <div id="teamline-stage">
-                <div id="teamline-overview"><table></table></div>
+                <!-- Container for the overview -->
+                <div id="teamline-overview"></div>
+                <!-- Container for the main charts -->
                 <div id="teamline-charts">
-                    <div id="grade-chart-container">
-                        <svg></svg>
+                    <!-- The grade chart on the left -->
+                    <div id="grade-chart-container" class="chart-container">
+                        <svg class="grade-chart"></svg>
                     </div>
-                    <div id="user-chart-1-container">
+                    <!-- The left of the two user charts -->
+                    <div id="user-chart-1-container" class="chart-container user-chart-container">
                         <svg class="user-chart"></svg>
+                        <div class="username-container"></div>
                     </div>
-                    <div id="user-chart-2-container">
+                    <!-- The right of the two user charts -->
+                    <div id="user-chart-2-container" class="chart-container user-chart-container">
                         <svg class="user-chart"></svg>
+                        <div class="username-container"></div>
                     </div>
                 </div>
-                <div id="teamline-gallery">
-
+                <!-- Container for our gallery -->
+                <div id="teamline-gallery"></div>
+                <!-- Our "meta legend" describing the legends -->
+                <div id="teamline-legend-details">
+                    <ul>
+                        <li>* 80% Pass Rate + 20% Coverage</li>
+                        <li>** against instructor-written tests</li>
+                        <li>*** of student-written tests</li>
+                    </ul>
                 </div>
             </div>
-
         </div>
 
+        <!-- Template for chart tooltips -->
         <script id="tooltip-template" type="text/x-handlebars-template">
             <div class="teamline-tooltip">
                 <ul>
@@ -47,6 +78,7 @@
             </div>
         </script>
 
+        <!-- Template for our menu buttons -->
         <script id="buttons-template" type="text/x-handlebars-template">
             <div class="btn-group" role="group">
                 {{#each buttons}}
@@ -55,6 +87,20 @@
             </div>
         </script>
 
+        <!-- Templates for our chart legends. We're using our own instead of the ones from NVD3 because they are
+         impossible to style and generally suck! -->
+        <script id="legend-template" type="text/x-handlebars-template">
+            <div class="teamline-legend">
+                <ul>
+                    {{#each items}}
+                    <li><span class="symbol" data-key="{{this.key}}" style="background: {{this.color}};"></span><span class="content">{{this.label}}</span></li>
+                    {{/each}}
+                </ul>
+            </div>
+        </script>
+
+        <!-- TEAMLINE! Our own script that contains our core functionality. We're including this at the end of body
+         so we don't need any DOM Ready listeners and speed up page load. -->
         <script src="js/teamline.js"></script>
     </body>
 </html>
