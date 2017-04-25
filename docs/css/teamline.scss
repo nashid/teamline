@@ -23,7 +23,7 @@ $grey_border_thin: 1px solid #ccc;
   }
 
   &[data-view="team"] {
-    #teamline-overview, #overview-legend {
+    #teamline-overview, .overview-legend {
       display: none;
     }
   }
@@ -105,7 +105,7 @@ $grey_border_thin: 1px solid #ccc;
   margin-right: 50px;
 }
 
-#overview-legend {
+#overview-legend-1 {
   margin-left: 30px;
 
   span {
@@ -113,7 +113,6 @@ $grey_border_thin: 1px solid #ccc;
     vertical-align: middle;
 
     &.text {
-      width: 30px;
       line-height: 15px;
       font-size: 16px;
       width: 60px;
@@ -125,9 +124,19 @@ $grey_border_thin: 1px solid #ccc;
       height: 25px;
       background: linear-gradient(to right, hsl(31, 100%, 50%), hsl(31, 100%, 100%));
     }
-
   }
+}
 
+#overview-legend-2 {
+  width: 100px;
+  vertical-align: middle;
+  font-size: 16px;
+  margin-left: 30px;
+  .dash {
+    letter-spacing: -5px;
+    color: #162eae;
+    padding-right: 10px;
+  }
 }
 
 #teamline-heading-input {
