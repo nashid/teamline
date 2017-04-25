@@ -19,7 +19,7 @@
   display: block;
 }
 /* line 26, teamline.scss */
-#teamline[data-view="team"] #teamline-overview, #teamline[data-view="team"] #overview-legend {
+#teamline[data-view="team"] #teamline-overview, #teamline[data-view="team"] .overview-legend {
   display: none;
 }
 /* line 32, teamline.scss */
@@ -97,23 +97,22 @@
 }
 
 /* line 108, teamline.scss */
-#overview-legend {
+#overview-legend-1 {
   margin-left: 30px;
 }
 /* line 111, teamline.scss */
-#overview-legend span {
+#overview-legend-1 span {
   display: inline-block;
   vertical-align: middle;
 }
 /* line 115, teamline.scss */
-#overview-legend span.text {
-  width: 30px;
+#overview-legend-1 span.text {
   line-height: 15px;
   font-size: 16px;
   width: 60px;
 }
-/* line 121, teamline.scss */
-#overview-legend span.gradient {
+/* line 120, teamline.scss */
+#overview-legend-1 span.gradient {
   margin-right: 5px;
   background: black;
   width: 100px;
@@ -121,7 +120,21 @@
   background: linear-gradient(to right, #ff8400, white);
 }
 
-/* line 133, teamline.scss */
+/* line 130, teamline.scss */
+#overview-legend-2 {
+  width: 100px;
+  vertical-align: middle;
+  font-size: 16px;
+  margin-left: 30px;
+}
+/* line 135, teamline.scss */
+#overview-legend-2 .dash {
+  letter-spacing: -5px;
+  color: #162eae;
+  padding-right: 10px;
+}
+
+/* line 142, teamline.scss */
 #teamline-heading-input {
   padding: 0 6px;
   font-size: 22px;
@@ -129,17 +142,17 @@
   width: 150px;
   text-align: center;
 }
-/* line 139, teamline.scss */
+/* line 148, teamline.scss */
 #teamline-heading-input:not(:focus) {
   background: inherit;
   border: none;
 }
-/* line 143, teamline.scss */
+/* line 152, teamline.scss */
 #teamline-heading-input:focus {
   outline: none;
 }
 
-/* line 148, teamline.scss */
+/* line 157, teamline.scss */
 #teamline-legend-details {
   position: absolute;
   padding: 10px;
@@ -148,24 +161,24 @@
   background: white;
   border: 3px solid #ccc;
 }
-/* line 156, teamline.scss */
+/* line 165, teamline.scss */
 #teamline-legend-details li {
   list-style-type: none;
 }
 
-/* line 161, teamline.scss */
+/* line 170, teamline.scss */
 #teamline-stage {
   width: 100%;
   height: 94%;
   overflow: auto;
 }
-/* line 166, teamline.scss */
+/* line 175, teamline.scss */
 #teamline-stage .username-container {
   width: 95%;
   position: absolute;
   text-align: center;
 }
-/* line 172, teamline.scss */
+/* line 181, teamline.scss */
 #teamline-stage #teamline-charts {
   overflow: auto;
   width: 100%;
@@ -173,94 +186,94 @@
   background: white;
   border-bottom: 3px solid #ccc;
 }
-/* line 179, teamline.scss */
+/* line 188, teamline.scss */
 #teamline-stage #teamline-charts > div {
   float: left;
   height: 100%;
 }
-/* line 183, teamline.scss */
+/* line 192, teamline.scss */
 #teamline-stage #teamline-charts > div:nth-child(1) {
   width: 40%;
 }
-/* line 186, teamline.scss */
+/* line 195, teamline.scss */
 #teamline-stage #teamline-charts > div:nth-child(2) {
   width: 30%;
 }
-/* line 190, teamline.scss */
+/* line 199, teamline.scss */
 #teamline-stage #teamline-charts > div:nth-child(3) {
   width: 30%;
 }
-/* line 196, teamline.scss */
+/* line 205, teamline.scss */
 #teamline-stage #teamline-charts .username-container {
   bottom: 15px;
   left: 10px;
   font-size: 22px;
 }
-/* line 203, teamline.scss */
+/* line 212, teamline.scss */
 #teamline-stage #teamline-gallery {
   width: 100%;
   height: 25%;
 }
 
-/* line 211, teamline.scss */
+/* line 220, teamline.scss */
 #teamline-charts svg .nv-axisMaxMin-y {
   display: none;
 }
-/* line 214, teamline.scss */
+/* line 223, teamline.scss */
 #teamline-charts svg .nv-axisMin-x {
   transform: translate(10px, 0) !important;
 }
-/* line 217, teamline.scss */
+/* line 226, teamline.scss */
 #teamline-charts svg .nv-axisMax-x {
   display: none;
 }
-/* line 221, teamline.scss */
+/* line 230, teamline.scss */
 #teamline-charts svg .nv-point {
   stroke-opacity: 1;
   stroke-width: 3px;
   fill-opacity: 1;
 }
-/* line 229, teamline.scss */
+/* line 238, teamline.scss */
 #teamline-charts svg .nv-x .nv-axis .tick:last-of-type text {
   transform: translate(-15px, 0);
   font-weight: bold;
 }
-/* line 240, teamline.scss */
+/* line 249, teamline.scss */
 #teamline-charts svg .nv-y .nv-axis .tick:first-child line {
   display: none;
 }
-/* line 250, teamline.scss */
+/* line 259, teamline.scss */
 #teamline-charts svg.grade-chart .nv-series-3 .nv-point, #teamline-charts svg.grade-chart .nv-series-4 .nv-point {
   display: none;
 }
-/* line 257, teamline.scss */
+/* line 266, teamline.scss */
 #teamline-charts svg.user-chart .nv-y .nv-axis .tick text {
   display: none;
 }
-/* line 262, teamline.scss */
+/* line 271, teamline.scss */
 #teamline-charts svg.user-chart .nv-series-2 .nv-point, #teamline-charts svg.user-chart .nv-series-3 .nv-point {
   display: none;
 }
-/* line 269, teamline.scss */
+/* line 278, teamline.scss */
 #teamline-charts svg .nv-group.dashed {
   stroke-dasharray: 10, 5;
   stroke-width: 4px !important;
 }
-/* line 273, teamline.scss */
+/* line 282, teamline.scss */
 #teamline-charts svg .nv-group.release {
   color: red;
 }
-/* line 276, teamline.scss */
+/* line 285, teamline.scss */
 #teamline-charts svg .nv-group.due {
   color: blue;
 }
 
-/* line 285, teamline.scss */
+/* line 294, teamline.scss */
 #teamline-gallery {
   overflow: auto;
   padding: 10px;
 }
-/* line 289, teamline.scss */
+/* line 298, teamline.scss */
 #teamline-gallery .gallery-chart-container {
   position: relative;
   float: left;
@@ -274,34 +287,34 @@
   background-position: 102% -2%;
   background-repeat: no-repeat;
 }
-/* line 302, teamline.scss */
+/* line 311, teamline.scss */
 #teamline-gallery .gallery-chart-container.active {
   background-image: url("../images/checked.png");
   border-color: #62b1f6;
 }
-/* line 307, teamline.scss */
+/* line 316, teamline.scss */
 #teamline-gallery .gallery-chart-container .username-container {
   bottom: 2px;
 }
-/* line 311, teamline.scss */
+/* line 320, teamline.scss */
 #teamline-gallery .gallery-chart-container .dateline {
   display: none;
 }
-/* line 318, teamline.scss */
+/* line 327, teamline.scss */
 #teamline-gallery svg .nv-point-paths {
   display: none;
 }
 
-/* line 325, teamline.scss */
+/* line 334, teamline.scss */
 .teamline-tooltip ul {
   margin: 0;
   padding: 5px;
 }
-/* line 329, teamline.scss */
+/* line 338, teamline.scss */
 .teamline-tooltip ul li {
   list-style-type: none;
 }
-/* line 332, teamline.scss */
+/* line 341, teamline.scss */
 .teamline-tooltip ul li .label {
   font-size: 100%;
   color: black;
@@ -309,52 +322,52 @@
   font-weight: bold;
 }
 
-/* line 346, teamline.scss */
+/* line 355, teamline.scss */
 .chart-container {
   position: relative;
 }
-/* line 349, teamline.scss */
+/* line 358, teamline.scss */
 .chart-container#grade-chart-container .teamline-legend {
   left: 55px;
 }
-/* line 352, teamline.scss */
+/* line 361, teamline.scss */
 .chart-container.user-chart-container .teamline-legend {
   left: 10px;
 }
-/* line 356, teamline.scss */
+/* line 365, teamline.scss */
 .chart-container .teamline-legend {
   position: absolute;
   top: 3px;
 }
-/* line 360, teamline.scss */
+/* line 369, teamline.scss */
 .chart-container .teamline-legend li {
   list-style-type: none;
   display: inline-block;
   position: relative;
   margin-right: 7px;
 }
-/* line 366, teamline.scss */
+/* line 375, teamline.scss */
 .chart-container .teamline-legend li:after {
   top: 0;
   display: block;
   position: absolute;
 }
-/* line 372, teamline.scss */
+/* line 381, teamline.scss */
 .chart-container .teamline-legend li:nth-child(1):after {
   right: -6px;
   content: "*";
 }
-/* line 376, teamline.scss */
+/* line 385, teamline.scss */
 .chart-container .teamline-legend li:nth-child(2):after {
   right: -11px;
   content: "**";
 }
-/* line 380, teamline.scss */
+/* line 389, teamline.scss */
 .chart-container .teamline-legend li:nth-child(3):after {
   right: -16px;
   content: "***";
 }
-/* line 385, teamline.scss */
+/* line 394, teamline.scss */
 .chart-container .teamline-legend li .symbol {
   margin-left: 5px;
   margin-right: 3px;
