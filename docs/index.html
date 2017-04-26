@@ -2,6 +2,7 @@
     <head>
         <meta charset="utf-8">
         <title>Teamline</title>
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
         <!-- Twitter Bootstrap for some straight-forward layouting -->
         <link rel="stylesheet" href="css/lib/bootstrap.min.css">
         <!-- NVD3 styles -->
@@ -23,6 +24,7 @@
 
         <!-- Our main wrapper that contains all the markup we need for Teamline -->
         <div id="teamline">
+            <div id="teamline-menu-container"></div>
             <!-- Our menu bar on the top -->
             <div id="teamline-menu">
                 <!-- Of course we need a logo! -->
@@ -34,11 +36,14 @@
                 <input id="teamline-heading-input"></input>
                 <!-- Our deliverable buttons -->
                 <div id="teamline-buttons"></div>
-                <!-- Overview legend -->
-                <div id="overview-legend">
+                <!-- Overview legends -->
+                <div id="overview-legend-1" class="overview-legend">
                     <span class="uneven text">Uneven contrib.</span>
                     <span class="gradient"></span>
                     <span class="even text">Even contrib.</span>
+                </div>
+                <div id="overview-legend-2" class="overview-legend">
+                    <span class="dash">—-----------</span><span class="text">Grade</span>
                 </div>
             </div>
             <!-- The Teamline stage! The main charts and the overview are drawn to the stage! -->
