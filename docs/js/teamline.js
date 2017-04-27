@@ -576,6 +576,5 @@
 		.on('click', '#teamline-overview', onOverviewTeamClick)
 		.on('keyup', '#teamline-heading-input', onTeamChange)
 		.on('blur', '#teamline-heading-input', onTeamInputBlur);
-	;
 
 }());

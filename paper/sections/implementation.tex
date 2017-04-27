@@ -1,3 +1,4 @@
+
 \documentclass[../manifest.tex]{subfiles}
 
 % - medium-level implementation description. you must include specifics of what you did yourself versus what other components/libraries/toolkits you built upon. this section is one major divergence from standard research paper format, you need to provide much more detail than would normally be appropriate in a research context. see this good example. teams of two or more people should include a breakdown of who did what work, as in this good example.
@@ -8,14 +9,41 @@ Implementation
 The work was divided as: ...
 We used the libraries: ...
 
-\subsection{Data Transformation}
+\subsection{Data Transformation (backend)}
 Teamline uses the CPSC310 course project data captured in a CouchDB noSQL database during term 2 of the 2016/17 year. We made a copy of this database after the project was complete and deployed the it on a personal server. The database is over 14 GB and contains approximately 44,000 commit records which contain details about the committed code including the pass rate against the instructor-written tests and the percentage of code the team covered with their own tests. These fields are extracted from the database using a map-reduce view whose code is available in \texttt{contribs-by-team.js}. The view emits a list of commit records which can be optionally filtered by team, deliverable and timestamp. On top of this view, we implemented a list function, whose code is available in \texttt{contrib.js}, that takes as input the filtered list of commits and outputs a list of team objects: aggregates of all the commits made by the members of the team. It also computes the contribution metrics discussed in section \ref{ssec:data-description}. A complete description of the fields emitted by the list function can be found in \texttt{data-guide.md}.
 
+<<<<<<< HEAD
 % how does it do the aggregate: walks through record-by-record and does the aggregation
 % emits a JSON file
 % 
 
 \subsection{Overview View}
 \subsection{Detail View}
+=======
+\subsection{Visualization (frontend)}
+The Teamline visualization was implemented as a Web application frontend with a simple \textbf{architecture}: (1) \texttt{index.html} with HTML markup and templates, (2) \texttt{teamline.js} with program logic of the application (JavaScript) and (3) \texttt{teamline.css} with stylesheets for layout and design (CSS).
+
+Teamline uses a number of \textbf{libraries and frameworks} aiming to maximize maintainability and reusability according to the \textit{DRY}\footnote{http://wiki.c2.com/?DontRepeatYourself} pattern in software engineering. The Teamline stylesheet (\texttt{teamline.css}) is generated with the \textbf{SASS}\footnote{http://sass-lang.com/} CSS precompiler. We used the selector nesting feature to avoid duplicate CSS selector code and variables for repetitive CSS property values. After the initial HTML markup in \texttt{index.html} is rendered on page load, numerous HTML fragments are rendered dynamically with JavaScript based on user interaction and the data received from the backend. To make this process as clean and little error-prone as possible, we included the \textbf{Handlebars}\footnote{http://handlebarsjs.com/} templating engine. Templates are contained as \texttt{script} tags in \texttt{index.html} with a \texttt{type="text/x-handlebars-template"} attribute, initially compiled in JavaScript on page load and then parametrized and rendered during runtime of the application. We included \textbf{jQuery}\footnote{https://jquery.com/} for DOM manipulation and general extended JavaScript library functions since it has become a standard in web programming and the authors are acquainted with it. The line and sparkline charts in Teamline are drawn with \textbf{NVD3}\footnote{http://nvd3.org/} which is an extension to \textbf{D3}\footnote{https://d3js.org/}. We decided for NVD3 because it supports our charting requirement with the least amount of repetitive drawing logic and exposes the underlying D3 API for scenarios when its capabilities are not enough for our use-case. We included \textbf{Moment}\footnote{https://momentjs.com/} for date formatting because we considered it more intuitive than the respective functions exposed by D3. We included \textbf{Twitter Bootstrap}\footnote{http://getbootstrap.com/} for simple general application styling.
+
+The \textbf{key characteristic} of the Teamline application is the concept of \textit{one data object and one state object} that are global to the module. The data object is populated after the data for Teamline was fetched with one initial request to the backend on page load. Teamline does not require further HTTP requests to the backend. We decided for a one-request pattern because this gives us maximum performance and the small amount of data required (\texttildelow2MB) makes this approach feasible. The state object determines what data and view is visible on the screen. Whenever the state object changes, the view is updated accordingly. This approach is implemented with the \textit{Observer pattern}\footnote{http://www.oodesign.com/observer-pattern.html}: events are dispatched upon state change (observable) and the respective listener (observer) updates the view. This state-based implementation enables us to redraw the current view with a simple state-update action and we can be generally open as to how the state is changed. The state object contains fields for the current \texttt{deliverableName}, \texttt{teamName}, \texttt{view} ('overview' vs. 'team') and \texttt{users} (visible in the contribution views).
+
+The \textbf{overview} view is created as a simple container with a variable amount of sub-containers ('team cells') based on the number of teams in the current deliverable. Cells are sized to fill the available space in their parent container. The background of the cells (encoding the team's distribution of contribution) is created dynamically using the lightness value of the HSL color scale, where 100 is most equal contribution (white) and 50 is least equal contribution (dark orange). The value between 50 and 100 is calculated using the contribution numbers served by the backend for each team (see section TODO). Sparkline charts (encoding the team's grade) are then drawn to each cell. We initially drew NVD3 line charts for each cell which confronted us with considerate performance issues and we switched to NVD3 sparkline charts in consequence which improved performance significantly (from \texttildelow8sec to \texttildelow2sec). Since the drawing operations for the sparklines are still visible to the user we only perform the drawing once for each deliverable (i.e. switching back and forth between deliverables will not result in redrawing operations). The sparkline's x-axis width is scaled back dynamically based on the team's final grade because NVD3 scales sparklines to fill the available space by default. Clicking on a team cell switches from the overview to the team view for the target team (by updating the \texttt{view} and \texttt{teamName} fields on the global state object).
+
+The \textbf{team} view consists of three line charts (the 'stage') and an array of thumbnail line charts (the 'gallery'). All charts are drawn as NVD3 line charts with different configuration settings. In our implementation this is visible in a call chain with different abstraction level and configuration at each step:
+\begin{verbatim}
+drawTeamCharts
+  |-- drawGradeChart
+    |-- drawLineChart
+  |-- drawGalleryCharts
+    |-- drawIndividualChart
+      |-- drawLineChart
+  |-- drawUserCharts
+    |-- drawIndividualChart
+      |-- drawLineChart
+\end{verbatim}
+
+Changes in layout and design to the charts were mostly implemented with CSS because NVD3's configuration capabilities often turned out to be too limited for our use-case. Along the same line, we decided to implement the chart legends and the username captions on our own with a dynamic template and HTML/CSS because NVD3 did not provide us appropriate means. Tooltips are rendered dynamically upon hover, parameterizing a template with data for the target commit depending on the chart type (grade chart vs. contribution chart). Whereas the grade chart on the left remains static for the current team view, the contents of the two contribution charts on the right changes dynamically depending on what users are selected in the gallery (by updating the \texttt{users} field on the global stage object).
+
+>>>>>>> 06d2d4d4a92a7982a189f45dc19f25591efb491d
 
 \end{document}
