@@ -1,3 +1,4 @@
+
 \documentclass[../manifest.tex]{subfiles}
 
 % - medium-level implementation description. you must include specifics of what you did yourself versus what other components/libraries/toolkits you built upon. this section is one major divergence from standard research paper format, you need to provide much more detail than would normally be appropriate in a research context. see this good example. teams of two or more people should include a breakdown of who did what work, as in this good example.
@@ -8,10 +9,13 @@ Implementation
 The work was divided as: ...
 We used the libraries: ...
 
-\subsection{Data Transformation}
+\subsection{Data Transformation (backend)}
 Teamline uses the CPSC310 course project data captured in a CouchDB noSQL database during term 2 of the 2016/17 year. We made a copy of this database after the project was complete and deployed the it on a personal server. The database is over 14 GB and contains approximately 44,000 commit records which contain details about the committed code including the pass rate against the instructor-written tests and the percentage of code the team covered with their own tests. These fields are extracted from the database using a map-reduce view whose code is available in \texttt{contribs-by-team.js}. The view emits a list of commit records which can be optionally filtered by team, deliverable and timestamp. On top of this view, we implemented a list function, whose code is available in \texttt{contrib.js}, that takes as input the filtered list of commits and outputs a list of team objects: aggregates of all the commits made by the members of the team. It also computes the contribution metrics discussed in section \ref{ssec:data-description}. A complete description of the fields emitted by the list function can be found in \texttt{data-guide.md}.
 
-\subsection{Overview View}
-\subsection{Detail View}
+\subsection{Visualization (frontend)}
+The Teamline visualization was implemented as a Web application with a \textbf{simple architecture}: (1) \texttt{index.html} with HTML markup and templates, (2) \texttt{teamline.js} with program logic of the application (JavaScript) and (3) \texttt{teamline.css} with stylesheets for layout and design (CSS).
+
+Teamline uses a number of \textbf{libraries and frameworks} aiming to maximize maintainability and reusability according to the \textit{DRY}\footnote{http://wiki.c2.com/?DontRepeatYourself} pattern in software engineering. The Teamline stylesheet (\texttt{teamline.css}) is generated with the \textbf{SASS}\footnote{http://sass-lang.com/} CSS precompiler. We used the selector nesting feature to avoid duplicate CSS selector code and variables for repetitive CSS property values. After the initial HTML markup in \texttt{index.html} is rendered on page load, numerous HTML fragments are rendered dynamically with JavaScript based on user interaction and the data received from the backend. To make this process as clean and little error-prone as possible, we included the \textbf{Handlebars}\footnote{http://handlebarsjs.com/} templating engine. Templates are contained as \texttt{script} tags in \texttt{index.html} with a \texttt{type="text/x-handlebars-template"} attribute, initially compiled in JavaScript on page load and then parameterized and rendered during runtime of the application. We included \textbf{jQuery}\footnote{https://jquery.com/} for DOM manipulation and general extended JavaScript library functions since it has become a standard in web programming and the authors are acquainted with it. The line charts in Teamline are drawn with \textbf{NVD3}\footnote{http://nvd3.org/} which is an extension to \textbf{D3}\footnote{https://d3js.org/}. We decided for NVD3 because it supports our requirement of line charts with the least amount of repetitive drawing logic and exposes the underlying D3 API for scenarios when its capabilities are not enough for our use-case. We included \textbf{Moment}\footnote{https://momentjs.com/} for date formatting because we considered it more intuitive than the respective functions exposed by D3.
+
 
 \end{document}
