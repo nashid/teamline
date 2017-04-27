@@ -19,21 +19,56 @@ have chosen a different way to divide the work among team members.
 
 
 \begin{table}
-  \centering
-  \label{tab:analysis}
   \caption{What-Why-How analysis of Teamline.}
-  \begin{tabular}{ l | l }
+  \label{tab:analysis}
+  \begin{tabularx}{\columnwidth}{ l | X }
     \hline
-    What: Data & Table of graded commits. \\
-    What: Derived & Measure of contribution:  \\
+    What: Data & Table of graded commits with attributes described in \ref{tab:attributes}. \\
+    \hline
+    What: Derived & Measure of contribution to pass rate and coverage; contribution uniformity. These are discussed in section \ref{ssec:data-description}. \\
+    \hline
     Why: Tasks & Present the uniformity of contributions and summarize the team's commit history. \\
-    How: Encode & We used a heatmap in the overview with  \\
-    How: Facet & Overview + detail views. Detail view is partitioned into side-by-side views. \\
-    How: Embed & Superimpose sparklines on the overview's heatmap cells. \\
-    How: Reduce & Filtering is done by selecting the team and the deliverable in  \\
     \hline
-  \end{tabular}
+    How: Encode & We used a heatmap with sparklines in the overview  and line charts in the detail view. Marks are positioned on a common time scale with color indicating the attribute that is being encoded.\\
+    \hline
+    How: Facet & Overview + detail views. Detail view is partitioned into side-by-side views. \\
+    \hline
+    How: Embed & Superimpose sparklines on the overview's heatmap cells. \\
+    \hline
+    How: Reduce & Filtering is done by selecting the team and the deliverable. \\
+    \hline
+  \end{tabularx}
 \end{table}
 
+
+
+% \begin{table}
+%   \label{tab:analysis}
+%   \caption{What-Why-How analysis of Teamline.}
+%   \begin{tabularx}{\columnwidth}{ l | l }
+%     \hline
+%     What: Data & Table of graded commits. \\
+%     What: Derived & \parbox{6cm}{Measure of contribution to pass rate and coverage. Contribution uniformity.}  \\
+%     Why: Tasks & \parbox{6cm}{Present the uniformity of contributions and summarize the team's commit history.} \\
+%     How: Encode & \parbox{6cm}{We used a heatmap in the overview with}  \\
+%     How: Facet & \parbox{6cm}{Overview + detail views. Detail view is partitioned into side-by-side views.} \\
+%     How: Embed & \parbox{6cm}{Superimpose sparklines on the overview's heatmap cells.} \\
+%     How: Reduce & \parbox{6cm}{Filtering is done by selecting the team and the deliverable in}  \\
+%     \hline
+%   \end{tabularx}
+% \end{table}
+
+
+
+% \begin{table}[h!]
+%   \centering
+%   \caption{Caption for the table.}
+%   \label{tab:table1}
+%   \begin{tabular}{l|c||r}
+%     1 & 2 & 3\\
+%     \hline
+%     a & b & c\\
+%   \end{tabular}
+% \end{table}
 
 \end{document}
