@@ -12,14 +12,6 @@ We used the libraries: ...
 \subsection{Data Transformation (backend)}
 Teamline uses the CPSC310 course project data captured in a CouchDB noSQL database during term 2 of the 2016/17 year. We made a copy of this database after the project was complete and deployed the it on a personal server. The database is over 14 GB and contains approximately 44,000 commit records which contain details about the committed code including the pass rate against the instructor-written tests and the percentage of code the team covered with their own tests. These fields are extracted from the database using a map-reduce view whose code is available in \texttt{contribs-by-team.js}. The view emits a list of commit records which can be optionally filtered by team, deliverable and timestamp. On top of this view, we implemented a list function, whose code is available in \texttt{contrib.js}, that takes as input the filtered list of commits and outputs a list of team objects: aggregates of all the commits made by the members of the team. It also computes the contribution metrics discussed in section \ref{ssec:data-description}. A complete description of the fields emitted by the list function can be found in \texttt{data-guide.md}.
 
-<<<<<<< HEAD
-% how does it do the aggregate: walks through record-by-record and does the aggregation
-% emits a JSON file
-% 
-
-\subsection{Overview View}
-\subsection{Detail View}
-=======
 \subsection{Visualization (frontend)}
 The Teamline visualization was implemented as a Web application frontend with a simple \textbf{architecture}: (1) \texttt{index.html} with HTML markup and templates, (2) \texttt{teamline.js} with program logic of the application (JavaScript) and (3) \texttt{teamline.css} with stylesheets for layout and design (CSS).
 
@@ -44,6 +36,6 @@ drawTeamCharts
 
 Changes in layout and design to the charts were mostly implemented with CSS because NVD3's configuration capabilities often turned out to be too limited for our use-case. Along the same line, we decided to implement the chart legends and the username captions on our own with a dynamic template and HTML/CSS because NVD3 did not provide us appropriate means. Tooltips are rendered dynamically upon hover, parameterizing a template with data for the target commit depending on the chart type (grade chart vs. contribution chart). Whereas the grade chart on the left remains static for the current team view, the contents of the two contribution charts on the right changes dynamically depending on what users are selected in the gallery (by updating the \texttt{users} field on the global stage object).
 
->>>>>>> 06d2d4d4a92a7982a189f45dc19f25591efb491d
+
 
 \end{document}
