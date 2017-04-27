@@ -1,27 +1,29 @@
 \documentclass[../manifest.tex]{subfiles}
 
 \begin{document}
+The work for this project was fairly evenly divided with Felix focusing on the frontend implementation and Nick preparing the data set and handling the interim components like the proposal. Table \ref{tab:schedule} shows the detailed work breakdown.
 
-\begin{table}[!htbp]
-  \caption{Task Schedule.}
+\begin{table}[!thb]
+  \caption{Task Breakdown}
   \label{tab:schedule}
-  \centering
-  \begin{tabular*}{\textwidth}{lrll}%{l r l l}@{\extracolsep{\fill}}
+  \begin{tabular*}{\columnwidth}{ l r r }
     \hline
-    \textbf{Task} & \textbf{Est Time} & \textbf{Deadline} & \textbf{Description} \\
+    \textbf{Task} & \textbf{Felix Time} & \textbf{Nick Time} \\ %& \textbf{Description} \\
     \hline
-    Pitch (x2)                       &  8 & Feb. 16  & Create slides, rehearse pitch. \\
-    Proposal                         & 12 & Mar. 6   & Discuss project ideas, create mockups, write proposal. \\
-    Project Review 1                 &  2 & Mar. 21  & Prepare slides. \\
-    Interim writeup                  &  6 & Mar. 31  & Summary of progress, completed previous work section. \\
-    Project Review 2                 &  2 & Apr. 2   & Prepare slides, have some version of demo ready. \\
-    Implementation                   & 48 & Apr. 7   & Completed vis tool. \\
-     - Create database view          &  8 & Mar. 14  & Create view(s) of computed/derived attributes in CouchDB. \\
-     - Create tabs/buttons           &  8 & Mar. 21  & Set up project frontend. Create navigation buttons. \\
-     - Main vis (Fig. \ref{fig:teaser})          & 25 & Mar. 31  & Implement team view including fetching data, display/layout,  interaction, animation. \\
-     - Main vis (Fig. \ref{fig:studentview})       & 15 & Apr. 7   & Implement student view. Some of the team view implementation should be reusable. \\
-    Presentation                     & 10 & Apr. 25  & Prepare slides, demo, video(?). Rehearse. \\
-    Final paper                      & 20 & Apr. 28  & Finalize paper. Draft to be written Apr. 10-18. \\
+    Pitch (x2)                       &  50\% &  50\% \\ %& Create slides, rehearse pitch. \\
+    Proposal                         &  20\% &  80\%  \\ %& Discuss project ideas, create mockups, write proposal. \\
+    Project Reviews                  & 100\% &   0\% \\ %& Prepare slides. \\
+    Related work                     &  20\% &   80\% \\ %& Summary of progress, completed previous work section. \\
+    Design                           &  50\% &   50\% \\
+    Implementation                   &  80\% &  20\% \\ %& Completed vis tool. \\
+     - Database views                &  10\% &  90\% \\ %& Create view(s) of computed/derived attributes in CouchDB. \\
+     - Overview                      &  90\% &  10\% \\ %& Implement team view including fetching data, display/layout,  interaction, animation. \\
+     - Detail                        &  80\% &  20\% \\ %& Implement student view. Some of the team view implementation should be reusable. \\
+    Presentation                     &  20\% &  80\% \\ %& Prepare slides and demo. \\
+    Final paper                      &  50\% &  50\% \\ %& Prepare final paper.\\
+    \hline
+    \hline
+    Overall                          &  50\% &  50\% \\
     \hline
   \end{tabular*}
 \end{table}
