@@ -1,10 +1,15 @@
 $grey_border: 3px solid #ccc;
 $grey_border_thin: 1px solid #ccc;
 
+body {
+  height: 100%;
+}
+
 #teamline {
   position: relative;
   display: none;
   width: 100%;
+  height: 100%;
   background: white;
 
   ul {
