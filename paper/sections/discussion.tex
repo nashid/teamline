@@ -9,24 +9,33 @@
 
 \subsection{Limitations of Contribution Metrics}
 In section \ref{ssec:data-description} we defined two different ways to measure contribution to a team-based coding project and here we discuss some of their limitations.
-The pass rate contribution is an all-or-nothing measure meaning that it only counts code that increases instructor-written tests, neglecting all supporting code. For example, it could be the case that one member writes many lines of code, commits them without passing any new tests, and then their partners makes a small change and passes several tests. In this example, the partner would be given all the credit. However, this can be largely mitigated by ensuring that instructor-written tests are very focused so that small changes to the code would be captured.
+The pass rate contribution is an all-or-nothing measure meaning that it only counts code that increases instructor-written tests, neglecting all supporting code. For example, it could be the case that one member writes many lines of code, commits them without passing any new tests, and then their partner makes a small change which causes several tests to pass. In this example, the partner would be given all the credit. However, this can be largely mitigated by ensuring that instructor-written tests are very focused so that small changes to the code would be captured.
 
-Determining contribution to the coverage score can also be challenging due to the fact that small changes to either the student-written test suite or the actual code can cause large changes to the coverage score on which the coverage contribution is based. We partly address this issue by only taking counting changes that cause the coverage score to increase beyond the running maximum.
+Determining contribution to the coverage score can also be challenging due to the fact that small changes to either the student-written test suite or the actual code can cause large changes to the coverage score on which the coverage contribution is based. We partly address this issue by only counting changes that cause the coverage score to increase beyond the running maximum.
 
 In both cases, the contribution measures lack robustness and are too dependent on individual metrics. For instance, neither takes into account the developer's skill or the time/effort it took for them to write the code. Also, the strong dependence of the contribution measures on the underlying pass rate and coverage make it hard to generalize to datasets that use different measures of code change and improvement. We discuss some approaches to these problems in the future work section.
 
 % We also defined contribution uniformity to summarize how evenly the contributions were made.
 
+
+\subsection{Limitations of the Visualization}
+Time constraints prevented us from completely a full evaluation of Teamline however, we were able to elicit feedback from members of the software practices lab; many of whom are or have been TAs for CPSC310. The most common comment was that the \textquote{axes are swapped} which lead to minor confusion when interpreting the visualization. While we noted that other commit visualization tools like \texttt{Gitk}\footnote{https://git-scm.com/docs/gitk} show time vertically and that comparing two line charts by stacking them can lead to visual distortion, it might be necessary to reevaluate the decision to show time on the y-axis. Another comment suggested that the class average should be shown in the grade chart in the detail view so that the TA has a benchmark for the selected team.
+
+The grade chart in the detail view can become cluttered, obfuscating certain commits. This issue is partly due to the high variability of grades between commits which causes the lines to cross a large portion of the chart in a zig-zag fashion. Some commits are special in that the student made a request to see their grade, typically because they believe they have passed more instructor-written tests.. We may wish to highlight these commits since it is likely that they would form a (nearly) monotonically increasing line.
+
+Finally, it could be the case that a TA would like to see how a team has progressed over deliverables. Currently, the TA would need to use their working memory and switch between each deliverable but this is not ideal. Instead, we should include an \textit{ALL} option in the deliverable selector that would remove the deliverable filter.
+
+
 \subsection{Future Work}
-- highlight commits that had feedback requested (more linear)
+As mentioned earlier, it is important that we enhance the robustness of the contribution measures. To do this, we would need to collect data for more metrics including code churn and coverage reports of instructor-written tests. With these, we would be better positioned to understand the flow of the code: where and when lines of code were changed and who made the changes. They would provide a much richer basis for deriving the code contribution attributes.
 
+We need to evaluate Teamline against the TAs who are responsible for grading student projects. We would like to see if the tool makes it more obvious which students contribute less (and by how much) and also if it makes the task of grading qualitatively easier. A quantitative evaluation where the time and accuracy of grading is be measured with and without Teamline would also be appropriate. This feedback will be critical in determining if Teamline actually solves the intended problem and would be required to if we are to refine the Teamline in future iterations.
+% se any  The evaluation may be qualitative by simply having TAs provide feedback via a survey or it could be quantitative where the time and accuracy of grading is measured.
 
+Currently, the Teamline frontend uses a static JSON file containing metrics for all teams to obtain the data it needs for the visualization. However, this will not work once the tool is deployed since the data will change frequently as students make changes to their code. The solution requires that the frontend query the grade database directly to get the data. While the backend is set up to respond to such queries, the frontend will require minor changes to read data from the backend's HTTP endpoint instead of a JSON file.
 
+Ultimately, we would like to extend Teamline to industrial software development teams so that it could assist with team awareness, task allocation and change summaries. This would likely require defining contribution based on metrics made available by version control and testing systems.
 
-
-
-In this paper, we defined an
-Teamline is the first attempt at defining contribution in the context of code-based projects so there is
 
 
 
@@ -37,13 +46,5 @@ Teamline is the first attempt at defining contribution in the context of code-ba
 %
 % - Abstract away AutoTest data so that can be used in industry
 % - Query live data
-% - Can only see one deliverable at a time: no way to see the complete history of the project.
-% - Issue with axis
 
-
-
-
-
-%% Limitations
-%  - 100% contribution to coverage but coverage grade only increased a few percent
 \end{document}
