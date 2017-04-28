@@ -37,7 +37,7 @@ The grade dataset is treated as a static table which contains over 44,000 submis
 
 \textbf{Overall contribution.} The overall contribution is computed as the sum of 80\% pass rate contribution and 20\% coverage contribution to match the weights used in computing the deliverable grade. This attribute is quantitative and ranges between 0 and 100\%.
 
-\textbf{Within-team contribution uniformity (CU).} This measures how evenly the team members contributed. It is a quantitative attribute that ranges from 0 to 1 where 0 indicates that one team member did all the work while 1 indicates a completely uniform workload split (each member contributed equally). This attribute is computed by taking the sorted pairwise difference of the overall contribution (computed as 80\% test grade contribution and 20\% coverage grade contribution) of each team member. More specifically, if $m$ is the number of team members and $u_i$ is the overall contribution for the $i$th team member (sorted by overall contribution), then we have
+\textbf{Within-team contribution uniformity (CU).} This measures how evenly the team members contributed. It is a quantitative attribute that ranges from 0 to 1 where 0 indicates that one team member did all the work while 1 indicates a completely uniform workload split where each member contributed equally. This attribute is computed by taking the sorted pairwise difference of the overall contribution, computed as 80\% test grade contribution and 20\% coverage grade contribution, of each team member. More specifically, if $m$ is the number of team members and $u_i$ is the overall contribution for the $i$th team member, sorted by overall contribution, then we have
 
 \begin{equation}
   \label{eq:con-uniform}
@@ -79,7 +79,7 @@ during the sprint and to ensure that the work was equitably distributed among th
 team members. This typically consists of a TA asking some questions designed to
 gauge a student's comprehension of the task and code. They may go so far as to
 explicitly and privately ask each student how evenly they felt the workload was
-split. Based on the retrospective, the TAs assign a scaling factor to the deliverable grade. For example, if
+split. Based on the retrospective, the TA assigns a scaling factor to the deliverable grade. For example, if
 the team got 90\% on the deliverable but one member did most of the work, the final
 grades might be 90\%*1.0 = 90\% and 90\%*0.6 = 54\%. Unfortunately, it can be hard
 to determine how much work was done by each student from these conversations since
@@ -87,7 +87,7 @@ the team member who contributed very little will attempt to spoof the TA while t
 hard-working one may not want to rat out their partner. One possible solution is
 to look at the commit history on GitHub to determine how many commits each student
 made. This can be a decent proxy but can be misleading since different people have
-different commit habits (some will commit every line, others only large changes)
+different commit habits (i.e. some will commit every line, others only large changes)
 and they may not reflect the actual contribution to the grade (i.e. commits that
 don't directly increase the grade).
 
