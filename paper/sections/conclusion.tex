@@ -3,5 +3,11 @@
 % - summarize what you've done in a way that's different from the abstract because you can count on the reader having now seen all of the content of the paper in between
 
 \begin{document}
-Conclusion
+In this paper we presented Teamline, a tool that visualizes contributions to a team-based project with an emphasis on contribution uniformity. It has been designed to assist TAs in retroactively scaling back grades of students that contributed less than their partners.  The Teamline visualization consists of a heatmap overview that allows users to identify teams with unequal contributions
+and to compare the overall grades for all teams. The detail view, which can be accessed by clicking one of the heatmap cells, shows the team's overall grade as well as the contribution scores of each team member. A gallery view shows users thumbnail versions of the contribution charts to help identify interesting contribution patterns, two of which can be selected to show in a large juxtaposed detail view.
+
+To create the Teamline visualization, we had to define derived metrics that would show team member's contributions to the project. We based these contribution metrics on the pass rate and coverage scores since these are what the final grade is based on. While the contribution metrics are a reasonable start, we believe that more robust measures of contribution could be derived by capturing additionally code metrics in the underlying dataset.
+
+The next step is to evaluate Teamline and collect user feedback before starting the next design iteration. We hope that with reasonable effort, Teamline could be deployed to TAs in future offerings of CPSC310.
+
 \end{document}
