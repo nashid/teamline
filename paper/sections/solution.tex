@@ -44,16 +44,7 @@ The user is first presented the \textbf{overview} shown in figure~\ref{fig:sampl
 
 \subsection{Detail View}
 
-Clicking on a heatmap cell switches to the \textbf{detail view} shown in figure~\ref{fig:sample-teamview}. The detail view is based on the team that was clicked on in the overview and can be changed on the fly by changing the team name in the menu bar which will result in redrawing operations of all charts. This view includes a stage area that is partitioned into three side-by-side views and a gallery area with a variable number of thumbnail line charts on the bottom. The stage area contains the \textbf{grade chart} (leftmost) and two \textbf{contribution charts} (middle and rightmost). All three charts share a common y-axis which encodes time. We chose this configuration, as opposed to using the x-axis to encode time, because version control systems commonly design their commit graphs that way and it allows us to take advantage of the wider screen aspect ratio of most modern consumer monitors. The x-axis is used to encode attribute values which differ based on the line chart. For the grade chart, the x-axis encodes the percentage pass rate, percentage coverage, and the overall percentage grade. The contribution charts encode the percentage contribution to pass rate and percentage contribution to coverage with the x-axis. To help us choose reasonable colors for the chart lines representing the five attributes, we used a 5-class qualitative color scale from Color Brewer\footnote{http://colorbrewer2.org/}.
-
-
-%% why line charts?
-
-%% Discuss the gallery
-
-
-
-
+Clicking on a heatmap cell switches to the \textbf{detail view} shown in figure~\ref{fig:sample-teamview}. The detail view is based on the team that was clicked on in the overview and can be changed on the fly by changing the team name in the menu bar which will result in redrawing operations of all charts. This view includes a stage area at the top that is partitioned into three side-by-side line charts and a gallery area with a variable number of small line charts at the bottom. The stage area contains the \textbf{grade chart} (left) and two \textbf{contribution charts} (middle and right). All three charts share a common y-axis which encodes time. We chose this configuration, instead of using the x-axis to encode time, because version control systems commonly design their commit graphs that way and it allows us to take advantage of the wider screen aspect ratio of most modern consumer monitors. The x-axis is used to encode attribute values which differ based on the line chart. For the grade chart, the x-axis encodes the percentage pass rate, percentage coverage, and the overall percentage grade. The contribution charts encode the percentage contribution to pass rate and percentage contribution to coverage with the x-axis. Because all of the attributes are quantitative, we encode them using a line chart. We could have used a scatter plot but decided it was important to connect the point marks to make it easier for the user to trace changes. We also made the line chart interactive by allowing users to see a tooltip containing details about individual commits by hovering over the point marks. To help us choose reasonable colors for the chart lines representing the five attributes, we used a 5-class qualitative color scale from Color Brewer\footnote{http://colorbrewer2.org/}.
 
 
 
