@@ -31,7 +31,7 @@ single submission (push event).
 \subsection{Data Description} \label{ssec:data-description}
 The grade dataset is treated as a static table which contains over 44,000 submission records for 285 students in 139 teams. From this dataset we use the attributes shown in table \ref{tab:attributes}. From those attributes we created the following derived attributes:
 
-\textbf{Pass rate contribution.} A student's commit is considered as contributing to the team's pass rate if one or more instructor-written tests are passed for the first time in this commit. The contribution is calculated as the number of tests passing for the first time divided by the total number of tests passed by the team. We do not visualize this value value directly. Instead, we visualize the accumulated value over all commits to ensure that the plotted points are monotonic. This is a quantitative attribute ranging from 0-100\%.
+\textbf{Pass rate contribution.} A student's commit is considered as contributing to the team's pass rate if one or more instructor-written tests are passed for the first time in this commit. The contribution is calculated as the number of tests passing for the first time divided by the total number of tests passed by the team. We do not visualize this value directly. Instead, we visualize the accumulated value over all commits to ensure that the plotted points are monotonic. This is a quantitative attribute ranging from 0-100\%.
 
 \textbf{Coverage contribution.} We consider a contribution to the coverage grade to occur when a commit increases the coverage grade beyond anything seen so far. The amount of the  contribution is the amount by which which it exceeds the running maximum. Again, we accumulate this value to ensure a monotonic line. Note that the coverage is increased when a student writes (more) tests that execute a higher proportion of their code or they change the total lines of code. This is a quantitative attribute ranging from 0-100\%.
 
@@ -91,6 +91,6 @@ different commit habits (i.e. some will commit every line, others only large cha
 and they may not reflect the actual contribution to the grade (i.e. commits that
 don't directly increase the grade).
 
-From the description, we can identify two distinct tasks that a TA is expected to perform. The first is to understand the uniformity of the contributions. To support this task the visualization needs to present the contributions to the user in a way that makes it apparent if contributions of one person where much larger or much smaller than the others. The second task is to summarize the commit history of the team. We discuss how Teamline line enables these tasks in the next section.
+From the description, we can identify two distinct tasks that a TA is expected to perform. The first is to understand the uniformity of the contributions. To support this task the visualization needs to present the contributions to the user in a way that makes it apparent if contributions of one person where much larger or much smaller than the others. The second task is to summarize the commit history of the team. We discuss how Teamline enables these tasks in the next section.
 
 \end{document}
