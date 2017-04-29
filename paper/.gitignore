@@ -1,6 +1,6 @@
 data/master.json
 db/
-manifest.pdf
+/manifest.pdf
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
